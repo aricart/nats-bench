@@ -1,0 +1,3 @@
+- when runing benches all parameters for both clients must match and verify that the implementation is doing what the args say
+- don't use common js, use modules for everything
+- when giving performance results always show the table with all the runtimes etc

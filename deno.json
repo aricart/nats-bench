@@ -1,0 +1,13 @@
+{
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@aricart/cobra": "jsr:@aricart/cobra@^0.1.2",
+    "@aricart/nd-progress": "jsr:@aricart/nd-progress@^1.0.1",
+    "@nats-io/nats-core": "jsr:@nats-io/nats-core@^3.0.0-18",
+    "@nats-io/transport-deno": "jsr:@nats-io/transport-deno@^3.0.0-18",
+    "@nats-io/transport-node": "npm:@nats-io/transport-node@^3.2.0"
+  },
+  "tasks": {
+    "bench": "deno run --allow-net --allow-read --allow-write bench.js"
+  }
+}
