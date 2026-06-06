@@ -3,6 +3,7 @@
 
 import { Benchmark, BenchSample, BenchType } from "./stats.js";
 import { progressFactory } from "@aricart/nd-progress";
+import { nuid } from "@nats-io/nats-core";
 
 export class PubBenchOptions {
   constructor() {
@@ -14,6 +15,7 @@ export class PubBenchOptions {
     this.multiSubject = false; // publish to subject.<seq>
     this.headers = null; // optional headers map
     this.progress = true; // show progress bar
+    this.warmup = false; // run warmup before benchmark
   }
 }
 
@@ -44,6 +46,7 @@ export async function benchPub(nc, opts = new PubBenchOptions(), externalProgres
       opts.multiSubject,
       Promise.resolve(), // no latch needed for single client
       progress,
+      opts.warmup,
     );
     if (progress) {
       progress.stop();
@@ -68,6 +71,7 @@ async function runPublisher(
   multiSubject,
   startLatch,
   progress,
+  warmup = false,
 ) {
   const sample = new BenchSample();
   sample.jobMsgCnt = msgCount;
@@ -75,9 +79,17 @@ async function runPublisher(
   // wait for start signal
   await startLatch;
 
+  // warmup: publish to unique subject to avoid interfering with any subscribers
+  if (warmup) {
+    const warmupSubject = nuid.next();
+    for (let i = 0; i < 1000; i++) {
+      nc.publish(warmupSubject, payload);
+    }
+    await nc.flush();
+  }
+
   sample.start = performance.now();
 
-  let currentCount = 0;
   for (let i = 0; i < msgCount; i++) {
     const subj = multiSubject ? `${subject}.${i}` : subject;
 
@@ -87,14 +99,14 @@ async function runPublisher(
       nc.publish(subj, payload);
     }
 
-    sample.msgCnt++;
-    sample.msgBytes += payload.length;
-    currentCount = i + 1;
-
     if (progress && i % 1000 === 0) {
-      progress.update(currentCount);
+      progress.update(i + 1);
     }
   }
+
+  // set final counts
+  sample.msgCnt = msgCount;
+  sample.msgBytes = msgCount * payload.length;
 
   // keep at 99% during flush to keep timer ticking (progress bar stops timer at 100%)
   const flushCount = Math.floor(msgCount * 0.99);

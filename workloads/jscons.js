@@ -172,16 +172,19 @@ async function runJSConsConsume(nc, js, jsm, opts, offset) {
   const sample = new BenchSample();
   sample.jobMsgCnt = opts.numMsgs;
 
-  // create or get durable pull consumer
+  // create or get durable pull consumer (idempotent under worker race)
   let consumer;
   try {
     consumer = await js.consumers.get(opts.stream, opts.consumer);
   } catch (err) {
-    // consumer doesn't exist, create it
-    await jsm.consumers.add(opts.stream, {
-      name: opts.consumer,
-      ack_policy: "explicit",
-    });
+    try {
+      await jsm.consumers.add(opts.stream, {
+        name: opts.consumer,
+        ack_policy: "explicit",
+      });
+    } catch (e) {
+      // race: another worker created it concurrently
+    }
     consumer = await js.consumers.get(opts.stream, opts.consumer);
   }
 
@@ -241,16 +244,19 @@ async function runJSConsFetch(nc, js, jsm, opts, offset) {
   const sample = new BenchSample();
   sample.jobMsgCnt = opts.numMsgs;
 
-  // create or get durable pull consumer
+  // create or get durable pull consumer (idempotent under worker race)
   let consumer;
   try {
     consumer = await js.consumers.get(opts.stream, opts.consumer);
   } catch (err) {
-    // consumer doesn't exist, create it
-    await jsm.consumers.add(opts.stream, {
-      name: opts.consumer,
-      ack_policy: "explicit",
-    });
+    try {
+      await jsm.consumers.add(opts.stream, {
+        name: opts.consumer,
+        ack_policy: "explicit",
+      });
+    } catch (e) {
+      // race: another worker created it concurrently
+    }
     consumer = await js.consumers.get(opts.stream, opts.consumer);
   }
 

@@ -203,6 +203,109 @@ export class Benchmark {
   }
 }
 
+export class IterationGroup {
+  constructor(name, benchType) {
+    this.name = name;
+    this.benchType = benchType;
+    this.iterations = [];
+    this.metadata = null;
+  }
+
+  add(benchmark) {
+    this.iterations.push(benchmark);
+  }
+
+  setMetadata(meta) {
+    this.metadata = meta;
+  }
+
+  rates() {
+    return this.iterations.map((b) => b.sampleGroup.rate());
+  }
+
+  throughputs() {
+    return this.iterations.map((b) => b.sampleGroup.throughput());
+  }
+
+  statistics() {
+    const rates = this.rates();
+    if (rates.length === 0) {
+      return { min: 0, median: 0, mean: 0, max: 0, stddev: 0, cv: 0 };
+    }
+    const sorted = [...rates].sort((a, b) => a - b);
+    const min = sorted[0];
+    const max = sorted[sorted.length - 1];
+    const mean = rates.reduce((a, b) => a + b, 0) / rates.length;
+    const median = sorted.length % 2
+      ? sorted[(sorted.length - 1) / 2]
+      : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
+    const variance = rates.reduce((s, r) => s + (r - mean) ** 2, 0) /
+      rates.length;
+    const stddev = Math.sqrt(variance);
+    const cv = mean > 0 ? (stddev / mean) * 100 : 0;
+    return { min, median, mean, max, stddev, cv };
+  }
+
+  report() {
+    let r = `\n${this.name} ${this.benchType} Benchmark (${this.iterations.length} iterations)\n`;
+    r += `=`.repeat(60) + `\n`;
+    this.iterations.forEach((b, i) => {
+      const rate = b.sampleGroup.rate();
+      const dur = b.sampleGroup.duration() / 1000;
+      r += `  iter ${String(i + 1).padStart(2)}: ${rate.toLocaleString().padStart(12)} msgs/sec  ${dur.toFixed(2)}s\n`;
+    });
+    const s = this.statistics();
+    r += `\nSummary across ${this.iterations.length} iterations (msgs/sec):\n`;
+    r += `  min:    ${Math.floor(s.min).toLocaleString().padStart(12)}\n`;
+    r += `  median: ${Math.floor(s.median).toLocaleString().padStart(12)}\n`;
+    r += `  mean:   ${Math.floor(s.mean).toLocaleString().padStart(12)}\n`;
+    r += `  max:    ${Math.floor(s.max).toLocaleString().padStart(12)}\n`;
+    r += `  stddev: ${Math.floor(s.stddev).toLocaleString().padStart(12)}  (cv ${s.cv.toFixed(2)}%)\n`;
+    return r;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      benchType: this.benchType,
+      metadata: this.metadata,
+      iterationCount: this.iterations.length,
+      summary: this.statistics(),
+      iterations: this.iterations.map((b, i) => ({
+        index: i,
+        ...b.toJSON(),
+      })),
+    };
+  }
+
+  csv() {
+    const rows = ["Iteration,RunID,MsgCount,MsgsPerSec,BytesPerSec,DurationSecs"];
+    this.iterations.forEach((b, i) => {
+      rows.push([
+        i + 1,
+        b.runId,
+        b.sampleGroup.msgCnt,
+        b.sampleGroup.rate(),
+        b.sampleGroup.throughput().toFixed(2),
+        (b.sampleGroup.duration() / 1000).toFixed(3),
+      ].join(","));
+    });
+    const s = this.statistics();
+    rows.push("");
+    rows.push("Summary,min,median,mean,max,stddev,cv%");
+    rows.push([
+      "msgs/sec",
+      Math.floor(s.min),
+      Math.floor(s.median),
+      Math.floor(s.mean),
+      Math.floor(s.max),
+      Math.floor(s.stddev),
+      s.cv.toFixed(2),
+    ].join(","));
+    return rows.join("\n");
+  }
+}
+
 function humanizeBytes(bytes) {
   const units = ["B", "KB", "MB", "GB", "TB"];
   let size = bytes;

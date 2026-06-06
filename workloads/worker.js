@@ -59,7 +59,13 @@ onMessage(async (data) => {
     }
 
     // import bench functions
-    const { benchPub, benchSub, PubBenchOptions, SubBenchOptions, benchKVPut, benchKVGet, KVPutOptions, KVGetOptions, benchJSPubAsync, JSPubAsyncOptions } = await import("./workloads/mod.js");
+    const {
+      benchPub, benchSub, PubBenchOptions, SubBenchOptions,
+      benchKVPut, benchKVGet, KVPutOptions, KVGetOptions,
+      benchJSPubAsync, JSPubAsyncOptions,
+      benchJSConsOrdered, benchJSConsConsume, benchJSConsFetch,
+      JSConsOrderedOptions, JSConsConsumeOptions, JSConsFetchOptions,
+    } = await import("./mod.js");
 
     // create progress reporter that sends updates to main thread
     const progressReporter = {
@@ -86,6 +92,7 @@ onMessage(async (data) => {
       opts.msgSize = config.msgSize;
       opts.multiSubject = config.multiSubject || false;
       opts.progress = false; // disable built-in progress
+      opts.warmup = config.warmup || false;
 
       if (config.payload) {
         opts.payload = config.payload;
@@ -157,6 +164,47 @@ onMessage(async (data) => {
 
       // pass progress reporter to benchJSPubAsync
       benchmark = await benchJSPubAsync(nc, js, opts, progressReporter);
+    } else if (command === "jscons-ordered") {
+      const { jetstream } = await import("@nats-io/jetstream");
+      const js = jetstream(nc);
+
+      const opts = new JSConsOrderedOptions();
+      opts.subject = config.subject;
+      opts.stream = config.stream;
+      opts.numClients = 1;
+      opts.numMsgs = config.msgsPerClient;
+      opts.useCallback = config.callback || false;
+
+      benchmark = await benchJSConsOrdered(nc, js, opts);
+    } else if (command === "jscons-consume") {
+      const { jetstream, jetstreamManager } = await import("@nats-io/jetstream");
+      const js = jetstream(nc);
+      const jsm = await jetstreamManager(nc);
+
+      const opts = new JSConsConsumeOptions();
+      opts.subject = config.subject;
+      opts.stream = config.stream;
+      opts.consumer = config.consumer || "nats-bench";
+      opts.numClients = 1;
+      opts.numMsgs = config.msgsPerClient;
+      opts.batchSize = config.batch || 500;
+      opts.useCallback = config.callback || false;
+
+      benchmark = await benchJSConsConsume(nc, js, jsm, opts);
+    } else if (command === "jscons-fetch") {
+      const { jetstream, jetstreamManager } = await import("@nats-io/jetstream");
+      const js = jetstream(nc);
+      const jsm = await jetstreamManager(nc);
+
+      const opts = new JSConsFetchOptions();
+      opts.subject = config.subject;
+      opts.stream = config.stream;
+      opts.consumer = config.consumer || "nats-bench";
+      opts.numClients = 1;
+      opts.numMsgs = config.msgsPerClient;
+      opts.batchSize = config.batch || 100;
+
+      benchmark = await benchJSConsFetch(nc, js, jsm, opts);
     }
 
     await nc.close();

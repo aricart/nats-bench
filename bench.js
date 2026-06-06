@@ -349,6 +349,8 @@ Examples:
     // check changed for payload since empty string could be intentional
     const payloadFlag = flags.getFlag("payload");
     const payload = payloadFlag?.changed ? flags.value("payload") : null;
+    const warmup = flags.value("warmup");
+    const iterations = flags.value("iterations");
 
     cmd.stdout(`Runtime: ${runtime} ${runtimeVersion}\n`);
     cmd.stdout(`Command: pub ${subject}\n`);
@@ -357,6 +359,8 @@ Examples:
     cmd.stdout(`Messages: ${msgs.toLocaleString()}\n`);
     cmd.stdout(`Size: ${size} bytes\n`);
     if (ws) cmd.stdout(`Transport: WebSocket\n`);
+    if (warmup) cmd.stdout(`Warmup: enabled\n`);
+    if (iterations > 1) cmd.stdout(`Iterations: ${iterations}\n`);
     cmd.stdout("\n");
 
     try {
@@ -369,6 +373,7 @@ Examples:
         payload: payload !== null ? new TextEncoder().encode(payload) : null,
         ws,
         transportNode,
+        warmup,
       };
 
       const jobOpts = {
@@ -376,55 +381,19 @@ Examples:
         numMsgs: msgs,
       };
 
-      // execute job with workers
-      const benchmark = await runWithWorkers("pub", jobConfig, jobOpts);
-
-      // set metadata
       const transportLib = transportNode ? "node" : (runtime === "deno" ? "deno" : "node");
-      benchmark.setMetadata({
-        runtime,
-        runtimeVersion,
+      const metadata = {
+        runtime, runtimeVersion,
         transport: ws ? "websocket" : "tcp",
         transportLib,
-        command: "pub",
-        subject,
-        options: {
-          server,
-          workers,
-          msgs,
-          size,
-          multisubject,
-        },
+        command: "pub", subject,
+        options: { server, workers, msgs, size, multisubject, iterations },
+      };
+
+      await runIterated({
+        command: "pub", jobConfig, jobOpts, metadata, iterations,
+        benchType: "PUB", cmd, jsonFile, csvFile,
       });
-
-      // output results
-      cmd.stdout(benchmark.report());
-      cmd.stdout("\n");
-
-      // save json if requested
-      if (jsonFile) {
-        const json = JSON.stringify(benchmark.toJSON(), null, 2);
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(jsonFile, json);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(jsonFile, json);
-        }
-        cmd.stdout(`JSON results written to ${jsonFile}\n`);
-      }
-
-      // save csv if requested
-      if (csvFile) {
-        const csv = benchmark.csv();
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(csvFile, csv);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(csvFile, csv);
-        }
-        cmd.stdout(`CSV results written to ${csvFile}\n`);
-      }
-
       return 0;
     } catch (err) {
       cmd.stderr(`\nError: ${err.message}\n`);
@@ -472,6 +441,20 @@ pub.addFlag({
   default: "",
 });
 
+pub.addFlag({
+  name: "warmup",
+  type: "boolean",
+  usage: "Run warmup before benchmark (default: false)",
+  default: false,
+});
+
+pub.addFlag({
+  name: "iterations",
+  type: "number",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  default: 1,
+});
+
 // add sub subcommand
 const sub = root.addCommand({
   use: "sub <subject>",
@@ -502,6 +485,7 @@ Examples:
     const transportNode = flags.value("transport-node");
     const csvFile = flags.value("csv");
     const jsonFile = flags.value("json");
+    const iterations = flags.value("iterations");
 
     cmd.stdout(`Runtime: ${runtime} ${runtimeVersion}\n`);
     cmd.stdout(`Command: sub ${subject}\n`);
@@ -510,6 +494,7 @@ Examples:
     cmd.stdout(`Messages: ${msgs.toLocaleString()}\n`);
     cmd.stdout(`Size: ${size} bytes\n`);
     if (ws) cmd.stdout(`Transport: WebSocket\n`);
+    if (iterations > 1) cmd.stdout(`Iterations: ${iterations}\n`);
     cmd.stdout("\n");
 
     try {
@@ -529,55 +514,19 @@ Examples:
         numMsgs: msgs,
       };
 
-      // execute job with workers
-      const benchmark = await runWithWorkers("sub", jobConfig, jobOpts);
-
-      // set metadata
       const transportLib = transportNode ? "node" : (runtime === "deno" ? "deno" : "node");
-      benchmark.setMetadata({
-        runtime,
-        runtimeVersion,
+      const metadata = {
+        runtime, runtimeVersion,
         transport: ws ? "websocket" : "tcp",
         transportLib,
-        command: "sub",
-        subject,
-        options: {
-          server,
-          workers,
-          msgs,
-          size,
-          multisubject: false,
-        },
+        command: "sub", subject,
+        options: { server, workers, msgs, size, multisubject: false, iterations },
+      };
+
+      await runIterated({
+        command: "sub", jobConfig, jobOpts, metadata, iterations,
+        benchType: "SUB", cmd, jsonFile, csvFile,
       });
-
-      // output results
-      cmd.stdout(benchmark.report());
-      cmd.stdout("\n");
-
-      // save json if requested
-      if (jsonFile) {
-        const json = JSON.stringify(benchmark.toJSON(), null, 2);
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(jsonFile, json);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(jsonFile, json);
-        }
-        cmd.stdout(`JSON results written to ${jsonFile}\n`);
-      }
-
-      // save csv if requested
-      if (csvFile) {
-        const csv = benchmark.csv();
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(csvFile, csv);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(csvFile, csv);
-        }
-        cmd.stdout(`CSV results written to ${csvFile}\n`);
-      }
-
       return 0;
     } catch (err) {
       cmd.stderr(`\nError: ${err.message}\n`);
@@ -609,6 +558,13 @@ sub.addFlag({
   type: "number",
   usage: "Size of the test messages (default: 128)",
   default: 128,
+});
+
+sub.addFlag({
+  name: "iterations",
+  type: "number",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  default: 1,
 });
 
 // add pubsub subcommand
@@ -644,6 +600,7 @@ Examples:
     const jsonFile = flags.value("json");
     const payloadFlag = flags.getFlag("payload");
     const payload = payloadFlag?.changed ? flags.value("payload") : null;
+    const iterations = flags.value("iterations");
 
     cmd.stdout(`Runtime: ${runtime} ${runtimeVersion}\n`);
     cmd.stdout(`Command: pubsub ${subject}\n`);
@@ -653,6 +610,7 @@ Examples:
     cmd.stdout(`Messages: ${msgs.toLocaleString()}\n`);
     cmd.stdout(`Size: ${size} bytes\n`);
     if (ws) cmd.stdout(`Transport: WebSocket\n`);
+    if (iterations > 1) cmd.stdout(`Iterations: ${iterations}\n`);
     cmd.stdout("\n");
 
     try {
@@ -677,99 +635,69 @@ Examples:
         transportNode,
       };
 
-      const pubJobOpts = {
-        numClients: pubworkers,
-        numMsgs: msgs,
-      };
+      const pubJobOpts = { numClients: pubworkers, numMsgs: msgs };
+      const subJobOpts = { numClients: subworkers, numMsgs: msgs };
 
-      const subJobOpts = {
-        numClients: subworkers,
-        numMsgs: msgs,
-      };
-
-      // start subscribers first
-      const subPromise = runWithWorkers("sub", subJobConfig, subJobOpts);
-
-      // give subscribers time to connect
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // start publishers
-      const pubPromise = runWithWorkers("pub", pubJobConfig, pubJobOpts);
-
-      // wait for both to complete
-      const [subBenchmark, pubBenchmark] = await Promise.all([subPromise, pubPromise]);
-
-      // set metadata for pub
       const transportLib = transportNode ? "node" : (runtime === "deno" ? "deno" : "node");
-      pubBenchmark.setMetadata({
-        runtime,
-        runtimeVersion,
+      const pubMeta = {
+        runtime, runtimeVersion,
         transport: ws ? "websocket" : "tcp",
         transportLib,
-        command: "pub",
-        subject,
-        options: {
-          server,
-          workers: pubworkers,
-          msgs,
-          size,
-          multisubject,
-        },
-      });
+        command: "pub", subject,
+        options: { server, workers: pubworkers, msgs, size, multisubject, iterations },
+      };
+      const subMeta = {
+        runtime, runtimeVersion,
+        transport: ws ? "websocket" : "tcp",
+        transportLib,
+        command: "sub", subject,
+        options: { server, workers: subworkers, msgs, size, multisubject: false, iterations },
+      };
 
-      // set metadata for sub
-      subBenchmark.setMetadata({
-        runtime,
-        runtimeVersion,
-        transport: ws ? "websocket" : "tcp",
-        transportLib,
-        command: "sub",
-        subject,
-        options: {
-          server,
-          workers: subworkers,
-          msgs,
-          size,
-          multisubject: false,
-        },
-      });
+      const { IterationGroup } = await importBenchFunctions();
+      const pubGroup = new IterationGroup("NATS", "PUB");
+      const subGroup = new IterationGroup("NATS", "SUB");
+      pubGroup.setMetadata(pubMeta);
+      subGroup.setMetadata(subMeta);
+
+      for (let i = 0; i < iterations; i++) {
+        if (iterations > 1) cmd.stdout(`\n>>> iteration ${i + 1}/${iterations}\n`);
+        const subPromise = runWithWorkers("sub", subJobConfig, subJobOpts);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const pubPromise = runWithWorkers("pub", pubJobConfig, pubJobOpts);
+        const [subBm, pubBm] = await Promise.all([subPromise, pubPromise]);
+        pubBm.setMetadata(pubMeta);
+        subBm.setMetadata(subMeta);
+        pubGroup.add(pubBm);
+        subGroup.add(subBm);
+        if (iterations > 1) {
+          cmd.stdout(`    pub rate: ${pubBm.sampleGroup.rate().toLocaleString()} msgs/sec\n`);
+          cmd.stdout(`    sub rate: ${subBm.sampleGroup.rate().toLocaleString()} msgs/sec\n`);
+        }
+      }
 
       // output results
       cmd.stdout("\n=== Publisher Results ===\n");
-      cmd.stdout(pubBenchmark.report());
+      cmd.stdout(iterations > 1 ? pubGroup.report() : pubGroup.iterations[0].report());
       cmd.stdout("\n");
-
       cmd.stdout("\n=== Subscriber Results ===\n");
-      cmd.stdout(subBenchmark.report());
+      cmd.stdout(iterations > 1 ? subGroup.report() : subGroup.iterations[0].report());
       cmd.stdout("\n");
 
-      // save json if requested
       if (jsonFile) {
         const combined = {
-          pub: pubBenchmark.toJSON(),
-          sub: subBenchmark.toJSON(),
+          pub: iterations > 1 ? pubGroup.toJSON() : pubGroup.iterations[0].toJSON(),
+          sub: iterations > 1 ? subGroup.toJSON() : subGroup.iterations[0].toJSON(),
         };
-        const json = JSON.stringify(combined, null, 2);
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(jsonFile, json);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(jsonFile, json);
-        }
+        await writeOutputFile(jsonFile, JSON.stringify(combined, null, 2));
         cmd.stdout(`JSON results written to ${jsonFile}\n`);
       }
 
-      // save csv if requested (both pub and sub)
       if (csvFile) {
-        const pubCsv = pubBenchmark.csv();
-        const subCsv = subBenchmark.csv();
+        const pubCsv = iterations > 1 ? pubGroup.csv() : pubGroup.iterations[0].csv();
+        const subCsv = iterations > 1 ? subGroup.csv() : subGroup.iterations[0].csv();
         const combined = `# Publisher Results\n${pubCsv}\n\n# Subscriber Results\n${subCsv}`;
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(csvFile, combined);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(csvFile, combined);
-        }
+        await writeOutputFile(csvFile, combined);
         cmd.stdout(`CSV results written to ${csvFile}\n`);
       }
 
@@ -825,6 +753,13 @@ pubsub.addFlag({
   type: "string",
   usage: "Custom message payload (default: empty)",
   default: "",
+});
+
+pubsub.addFlag({
+  name: "iterations",
+  type: "number",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  default: 1,
 });
 
 // add kv command with put and get subcommands
@@ -899,6 +834,14 @@ kv.addFlag({
   persistent: true,
 });
 
+kv.addFlag({
+  name: "iterations",
+  type: "number",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  default: 1,
+  persistent: true,
+});
+
 // kv put subcommand
 const kvput = kv.addCommand({
   use: "put",
@@ -931,6 +874,7 @@ Examples:
     const jsonFile = flags.value("json");
     const payloadFlag = flags.getFlag("payload");
     const payload = payloadFlag?.changed ? flags.value("payload") : null;
+    const iterations = flags.value("iterations");
 
     cmd.stdout(`Runtime: ${runtime} ${runtimeVersion}\n`);
     cmd.stdout(`Command: kv put ${bucket}\n`);
@@ -941,76 +885,29 @@ Examples:
     if (keyprefix) cmd.stdout(`Key Prefix: ${keyprefix}\n`);
     if (sleep > 0) cmd.stdout(`Sleep: ${sleep}ms\n`);
     if (ws) cmd.stdout(`Transport: WebSocket\n`);
+    if (iterations > 1) cmd.stdout(`Iterations: ${iterations}\n`);
     cmd.stdout("\n");
 
     try {
-      // build job description
       const jobConfig = {
-        server,
-        bucket,
-        msgSize: size,
+        server, bucket, msgSize: size,
         payload: payload !== null ? new TextEncoder().encode(payload) : null,
-        keyprefix,
-        sleep,
-        ws,
-        transportNode,
+        keyprefix, sleep, ws, transportNode,
       };
-
-      const jobOpts = {
-        numClients: workers,
-        numMsgs: msgs,
-      };
-
-      // execute job with workers
-      const benchmark = await runWithWorkers("kvput", jobConfig, jobOpts);
-
-      // set metadata
+      const jobOpts = { numClients: workers, numMsgs: msgs };
       const transportLib = transportNode ? "node" : (runtime === "deno" ? "deno" : "node");
-      benchmark.setMetadata({
-        runtime,
-        runtimeVersion,
+      const metadata = {
+        runtime, runtimeVersion,
         transport: ws ? "websocket" : "tcp",
         transportLib,
-        command: "kv put",
-        bucket,
-        options: {
-          server,
-          workers,
-          msgs,
-          size,
-          keyprefix,
-          sleep,
-        },
+        command: "kv put", bucket,
+        options: { server, workers, msgs, size, keyprefix, sleep, iterations },
+      };
+
+      await runIterated({
+        command: "kvput", jobConfig, jobOpts, metadata, iterations,
+        benchType: "KV_PUT", cmd, jsonFile, csvFile,
       });
-
-      // output results
-      cmd.stdout(benchmark.report());
-      cmd.stdout("\n");
-
-      // save json if requested
-      if (jsonFile) {
-        const json = JSON.stringify(benchmark.toJSON(), null, 2);
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(jsonFile, json);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(jsonFile, json);
-        }
-        cmd.stdout(`JSON results written to ${jsonFile}\n`);
-      }
-
-      // save csv if requested
-      if (csvFile) {
-        const csv = benchmark.csv();
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(csvFile, csv);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(csvFile, csv);
-        }
-        cmd.stdout(`CSV results written to ${csvFile}\n`);
-      }
-
       return 0;
     } catch (err) {
       cmd.stderr(`\nError: ${err.message}\n`);
@@ -1046,6 +943,7 @@ Examples:
     const transportNode = flags.value("transport-node");
     const csvFile = flags.value("csv");
     const jsonFile = flags.value("json");
+    const iterations = flags.value("iterations");
 
     cmd.stdout(`Runtime: ${runtime} ${runtimeVersion}\n`);
     cmd.stdout(`Command: kv get ${bucket}\n`);
@@ -1056,75 +954,25 @@ Examples:
     if (randomize > 0) cmd.stdout(`Randomize: 0-${randomize - 1}\n`);
     if (sleep > 0) cmd.stdout(`Sleep: ${sleep}ms\n`);
     if (ws) cmd.stdout(`Transport: WebSocket\n`);
+    if (iterations > 1) cmd.stdout(`Iterations: ${iterations}\n`);
     cmd.stdout("\n");
 
     try {
-      // build job description
-      const jobConfig = {
-        server,
-        bucket,
-        keyprefix,
-        randomize,
-        sleep,
-        ws,
-        transportNode,
-      };
-
-      const jobOpts = {
-        numClients: workers,
-        numMsgs: msgs,
-      };
-
-      // execute job with workers
-      const benchmark = await runWithWorkers("kvget", jobConfig, jobOpts);
-
-      // set metadata
+      const jobConfig = { server, bucket, keyprefix, randomize, sleep, ws, transportNode };
+      const jobOpts = { numClients: workers, numMsgs: msgs };
       const transportLib = transportNode ? "node" : (runtime === "deno" ? "deno" : "node");
-      benchmark.setMetadata({
-        runtime,
-        runtimeVersion,
+      const metadata = {
+        runtime, runtimeVersion,
         transport: ws ? "websocket" : "tcp",
         transportLib,
-        command: "kv get",
-        bucket,
-        options: {
-          server,
-          workers,
-          msgs,
-          keyprefix,
-          randomize,
-          sleep,
-        },
+        command: "kv get", bucket,
+        options: { server, workers, msgs, keyprefix, randomize, sleep, iterations },
+      };
+
+      await runIterated({
+        command: "kvget", jobConfig, jobOpts, metadata, iterations,
+        benchType: "KV_GET", cmd, jsonFile, csvFile,
       });
-
-      // output results
-      cmd.stdout(benchmark.report());
-      cmd.stdout("\n");
-
-      // save json if requested
-      if (jsonFile) {
-        const json = JSON.stringify(benchmark.toJSON(), null, 2);
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(jsonFile, json);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(jsonFile, json);
-        }
-        cmd.stdout(`JSON results written to ${jsonFile}\n`);
-      }
-
-      // save csv if requested
-      if (csvFile) {
-        const csv = benchmark.csv();
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(csvFile, csv);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(csvFile, csv);
-        }
-        cmd.stdout(`CSV results written to ${csvFile}\n`);
-      }
-
       return 0;
     } catch (err) {
       cmd.stderr(`\nError: ${err.message}\n`);
@@ -1200,6 +1048,14 @@ js.addFlag({
   persistent: true,
 });
 
+js.addFlag({
+  name: "iterations",
+  type: "number",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  default: 1,
+  persistent: true,
+});
+
 // js pub subcommand
 const jspub = js.addCommand({
   use: "pub <subject>",
@@ -1237,6 +1093,7 @@ Examples:
     const jsonFile = flags.value("json");
     const payloadFlag = flags.getFlag("payload");
     const payload = payloadFlag?.changed ? flags.value("payload") : null;
+    const iterations = flags.value("iterations");
 
     cmd.stdout(`Runtime: ${runtime} ${runtimeVersion}\n`);
     cmd.stdout(`Command: js pub ${subject}\n`);
@@ -1250,84 +1107,31 @@ Examples:
     if (sleep > 0) cmd.stdout(`Sleep: ${sleep}ms\n`);
     if (purge) cmd.stdout(`Purge: enabled\n`);
     if (ws) cmd.stdout(`Transport: WebSocket\n`);
+    if (iterations > 1) cmd.stdout(`Iterations: ${iterations}\n`);
     cmd.stdout("\n");
 
     try {
-      // build job description
       const jobConfig = {
-        server,
-        subject,
-        stream,
-        msgSize: size,
+        server, subject, stream, msgSize: size,
         payload: payload !== null ? new TextEncoder().encode(payload) : null,
         multiSubject: multisubject,
         multiSubjectMax: multisubjectmax,
-        batch,
-        sleep,
-        purge,
-        ws,
-        transportNode,
+        batch, sleep, purge, ws, transportNode,
       };
-
-      const jobOpts = {
-        numClients: workers,
-        numMsgs: msgs,
-      };
-
-      // execute job with workers
-      const benchmark = await runWithWorkers("jspub", jobConfig, jobOpts);
-
-      // set metadata
+      const jobOpts = { numClients: workers, numMsgs: msgs };
       const transportLib = transportNode ? "node" : (runtime === "deno" ? "deno" : "node");
-      benchmark.setMetadata({
-        runtime,
-        runtimeVersion,
+      const metadata = {
+        runtime, runtimeVersion,
         transport: ws ? "websocket" : "tcp",
         transportLib,
-        command: "js pub",
-        subject,
-        stream,
-        options: {
-          server,
-          workers,
-          msgs,
-          size,
-          batch,
-          multisubject,
-          multisubjectmax,
-          sleep,
-          purge,
-        },
+        command: "js pub", subject, stream,
+        options: { server, workers, msgs, size, batch, multisubject, multisubjectmax, sleep, purge, iterations },
+      };
+
+      await runIterated({
+        command: "jspub", jobConfig, jobOpts, metadata, iterations,
+        benchType: "JSPUB_BATCH", cmd, jsonFile, csvFile,
       });
-
-      // output results
-      cmd.stdout(benchmark.report());
-      cmd.stdout("\n");
-
-      // save json if requested
-      if (jsonFile) {
-        const json = JSON.stringify(benchmark.toJSON(), null, 2);
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(jsonFile, json);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(jsonFile, json);
-        }
-        cmd.stdout(`JSON results written to ${jsonFile}\n`);
-      }
-
-      // save csv if requested
-      if (csvFile) {
-        const csv = benchmark.csv();
-        if (typeof Deno !== "undefined") {
-          await Deno.writeTextFile(csvFile, csv);
-        } else {
-          const { writeFile } = await import("fs/promises");
-          await writeFile(csvFile, csv);
-        }
-        cmd.stdout(`CSV results written to ${csvFile}\n`);
-      }
-
       return 0;
     } catch (err) {
       cmd.stderr(`\nError: ${err.message}\n`);
@@ -1359,6 +1163,230 @@ jspub.addFlag({
   type: "number",
   usage: "Batch size for async publish (default: 500)",
   default: 500,
+});
+
+// delete a jetstream consumer (used to reset between iterations)
+async function deleteConsumer({ server, stream, consumer, ws, transportNode }) {
+  const runtime = detectRuntime();
+  let nc;
+  if (ws) {
+    const core = await import("@nats-io/nats-core");
+    const url = server.startsWith("ws://") ? server : `ws://${server}`;
+    nc = await core.wsconnect({ servers: url, maxReconnectAttempts: 0 });
+  } else if (transportNode || runtime === "node" || runtime === "bun") {
+    const mod = await import("@nats-io/transport-node");
+    nc = await mod.connect({ servers: server, maxReconnectAttempts: 0 });
+  } else {
+    const mod = await import("@nats-io/transport-deno");
+    nc = await mod.connect({ servers: server, maxReconnectAttempts: 0 });
+  }
+  try {
+    const { jetstreamManager } = await import("@nats-io/jetstream");
+    const jsm = await jetstreamManager(nc);
+    try {
+      await jsm.consumers.delete(stream, consumer);
+    } catch (_) {
+      // consumer may not exist; ignore
+    }
+  } finally {
+    await nc.close();
+  }
+}
+
+// shared writer for json/csv outputs
+async function writeOutputFile(path, content) {
+  if (typeof Deno !== "undefined") {
+    await Deno.writeTextFile(path, content);
+  } else {
+    const { writeFile } = await import("fs/promises");
+    await writeFile(path, content);
+  }
+}
+
+// shared iterated runner: loops N times, builds IterationGroup, emits report + output files
+async function runIterated({ command, jobConfig, jobOpts, metadata, iterations, benchType, cmd, jsonFile, csvFile, header, beforeEach, afterEach }) {
+  const { IterationGroup } = await importBenchFunctions();
+  const group = new IterationGroup("NATS", benchType);
+  group.setMetadata(metadata);
+
+  for (let i = 0; i < iterations; i++) {
+    if (iterations > 1) cmd.stdout(`\n>>> iteration ${i + 1}/${iterations}\n`);
+    if (beforeEach) await beforeEach(i);
+    const benchmark = await runWithWorkers(command, jobConfig, jobOpts);
+    benchmark.setMetadata(metadata);
+    group.add(benchmark);
+    if (iterations > 1) {
+      cmd.stdout(`    rate: ${benchmark.sampleGroup.rate().toLocaleString()} msgs/sec\n`);
+    }
+    if (afterEach) await afterEach(i);
+  }
+
+  if (header) cmd.stdout(header);
+  cmd.stdout(iterations > 1 ? group.report() : group.iterations[0].report());
+  cmd.stdout("\n");
+
+  if (jsonFile) {
+    const out = iterations > 1 ? group.toJSON() : group.iterations[0].toJSON();
+    await writeOutputFile(jsonFile, JSON.stringify(out, null, 2));
+    cmd.stdout(`JSON results written to ${jsonFile}\n`);
+  }
+  if (csvFile) {
+    const out = iterations > 1 ? group.csv() : group.iterations[0].csv();
+    await writeOutputFile(csvFile, out);
+    cmd.stdout(`CSV results written to ${csvFile}\n`);
+  }
+  return group;
+}
+
+// shared runner for js consumer subcommands
+async function runJSConsCommand(cmd, args, flags, mode) {
+  if (args.length === 0) {
+    cmd.stderr(`Error: subject is required\n`);
+    cmd.stderr(`Usage: bench js ${mode} <subject> [flags]\n`);
+    return 1;
+  }
+
+  const subject = args[0];
+  const runtime = detectRuntime();
+  const runtimeVersion = getRuntimeVersion();
+
+  const server = flags.value("server");
+  const workers = flags.value("workers");
+  const msgs = flags.value("msgs");
+  const stream = flags.value("stream");
+  const ws = flags.value("ws");
+  const transportNode = flags.value("transport-node");
+  const csvFile = flags.value("csv");
+  const jsonFile = flags.value("json");
+  const iterations = flags.value("iterations");
+
+  const callback = mode !== "fetch" ? flags.value("callback") : false;
+  const consumer = mode !== "ordered" ? flags.value("consumer") : null;
+  const defaultBatch = mode === "fetch" ? 100 : 500;
+  const batchFlag = flags.getFlag("batch");
+  const batch = batchFlag?.changed ? flags.value("batch") : defaultBatch;
+
+  cmd.stdout(`Runtime: ${runtime} ${runtimeVersion}\n`);
+  cmd.stdout(`Command: js ${mode} ${subject}\n`);
+  cmd.stdout(`Server: ${server}\n`);
+  cmd.stdout(`Stream: ${stream}\n`);
+  if (consumer) cmd.stdout(`Consumer: ${consumer}\n`);
+  cmd.stdout(`Workers: ${workers}\n`);
+  cmd.stdout(`Messages: ${msgs.toLocaleString()}\n`);
+  if (mode !== "ordered") cmd.stdout(`Batch: ${batch}\n`);
+  if (mode !== "fetch") cmd.stdout(`Callback: ${callback}\n`);
+  if (ws) cmd.stdout(`Transport: WebSocket\n`);
+  if (iterations > 1) cmd.stdout(`Iterations: ${iterations}\n`);
+  cmd.stdout("\n");
+
+  try {
+    const jobConfig = { server, subject, stream, consumer, callback, batch, ws, transportNode };
+    const jobOpts = { numClients: workers, numMsgs: msgs };
+    const transportLib = transportNode ? "node" : (runtime === "deno" ? "deno" : "node");
+    const metadata = {
+      runtime, runtimeVersion,
+      transport: ws ? "websocket" : "tcp",
+      transportLib,
+      command: `js ${mode}`, subject, stream,
+      options: { server, workers, msgs, batch, consumer, callback, iterations },
+    };
+    const benchTypeMap = {
+      ordered: "JSCONS_ORDERED",
+      consume: "JSCONS_CONSUME",
+      fetch: "JSCONS_FETCH",
+    };
+
+    // for durable consumer modes, delete consumer between iters so each iter
+    // starts from beginning of stream (otherwise iter 2+ wait forever on empty queue)
+    let beforeEach = null;
+    if (mode !== "ordered" && iterations > 1) {
+      beforeEach = async (i) => {
+        if (i === 0) return; // first iter: workload creates fresh
+        await deleteConsumer({ server, stream, consumer, ws, transportNode });
+      };
+    }
+
+    await runIterated({
+      command: `jscons-${mode}`, jobConfig, jobOpts, metadata, iterations,
+      benchType: benchTypeMap[mode] || "JSCONS_CONSUME",
+      cmd, jsonFile, csvFile, beforeEach,
+    });
+    return 0;
+  } catch (err) {
+    cmd.stderr(`\nError: ${err.message}\n`);
+    if (err.stack) cmd.stderr(err.stack + "\n");
+    return 1;
+  }
+}
+
+// js ordered subcommand (ephemeral ordered consumer)
+const jsordered = js.addCommand({
+  use: "ordered <subject>",
+  short: "Consume JetStream messages with an ephemeral ordered consumer",
+  long: `Benchmark consumption with an ephemeral ordered consumer.
+
+Examples:
+  bench js ordered bench --msgs 100000`,
+  run: (cmd, args, flags) => runJSConsCommand(cmd, args, flags, "ordered"),
+});
+jsordered.addFlag({
+  name: "callback",
+  type: "boolean",
+  usage: "Use callback API instead of iterator (default: false)",
+  default: false,
+});
+
+// js consume subcommand (durable pull consumer, callback or iter)
+const jsconsume = js.addCommand({
+  use: "consume <subject>",
+  short: "Consume JetStream messages from a durable pull consumer",
+  long: `Benchmark consumption from a durable pull consumer.
+
+Examples:
+  bench js consume bench --msgs 100000
+  bench js consume bench --msgs 100000 --consumer my-cons --callback`,
+  run: (cmd, args, flags) => runJSConsCommand(cmd, args, flags, "consume"),
+});
+jsconsume.addFlag({
+  name: "consumer",
+  type: "string",
+  usage: "Durable consumer name (default: nats-bench)",
+  default: "nats-bench",
+});
+jsconsume.addFlag({
+  name: "batch",
+  type: "number",
+  usage: "Max messages per consume batch (default: 500)",
+  default: 500,
+});
+jsconsume.addFlag({
+  name: "callback",
+  type: "boolean",
+  usage: "Use callback API instead of iterator (default: false)",
+  default: false,
+});
+
+// js fetch subcommand (durable pull consumer, batched fetch)
+const jsfetch = js.addCommand({
+  use: "fetch <subject>",
+  short: "Consume JetStream messages from a durable pull consumer using fetch",
+  long: `Benchmark consumption with batched fetch on a durable pull consumer.
+
+Examples:
+  bench js fetch bench --msgs 100000 --batch 100`,
+  run: (cmd, args, flags) => runJSConsCommand(cmd, args, flags, "fetch"),
+});
+jsfetch.addFlag({
+  name: "consumer",
+  type: "string",
+  usage: "Durable consumer name (default: nats-bench)",
+  default: "nats-bench",
+});
+jsfetch.addFlag({
+  name: "batch",
+  type: "number",
+  usage: "Messages per fetch (default: 100)",
+  default: 100,
 });
 
 // execute
