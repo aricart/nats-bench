@@ -1,12 +1,40 @@
 {
+  "name": "@aricart/nats-bench",
+  "version": "0.1.0-0",
+  "description": "NATS benchmarks for the JavaScript clients: core pub/sub, JetStream and KV, on Node.js, Deno and Bun",
   "type": "module",
+  "bin": {
+    "nats-bench": "bench.js"
+  },
+  "files": [
+    "bench.js",
+    "workloads/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">= 22"
+  },
+  "keywords": [
+    "nats",
+    "benchmark",
+    "jetstream",
+    "kv",
+    "deno",
+    "bun"
+  ],
+  "author": "Alberto Ricart",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aricart/nats-bench.git"
+  },
   "dependencies": {
     "@aricart/cobra": "^0.2.0",
     "@nats-io/jetstream": "3.5.0",
     "@nats-io/kv": "3.5.0",
     "@nats-io/nats-core": "3.5.0",
     "@nats-io/transport-node": "3.5.0",
-    "cli-progress": "^3.12.0",
-    "minimist": "^1.2.8"
+    "cli-progress": "^3.12.0"
   }
 }

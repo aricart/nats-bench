@@ -7,6 +7,7 @@
 //   bun bench.js pub test --msgs 100000
 
 import { cli } from "@aricart/cobra";
+import { tcpConnect } from "./workloads/transport.js";
 
 // detect runtime
 function detectRuntime() {
@@ -45,18 +46,8 @@ async function createConnection(options) {
     const url = servers.startsWith("ws://") ? servers : `ws://${servers}`;
     nc = await wsconnect({ ...opts, servers: url });
   } else {
-    // use runtime-specific transport
-    if (transportNode || runtime === "node" || runtime === "bun") {
-      // use node transport (default for node/bun, optional for deno)
-      const mod = await import("@nats-io/transport-node");
-      const { connect } = mod;
-      nc = await connect(opts);
-    } else {
-      // use deno transport (default for deno)
-      const mod = await import("@nats-io/transport-deno");
-      const { connect } = mod;
-      nc = await connect(opts);
-    }
+    // the runtime's tcp transport
+    nc = await tcpConnect(opts, { runtime, transportNode });
   }
 
   // listen for connection closed
@@ -1179,12 +1170,11 @@ async function deleteConsumer({ server, stream, consumer, ws, transportNode }) {
     const core = await import("@nats-io/nats-core");
     const url = server.startsWith("ws://") ? server : `ws://${server}`;
     nc = await core.wsconnect({ servers: url, maxReconnectAttempts: 0 });
-  } else if (transportNode || runtime === "node" || runtime === "bun") {
-    const mod = await import("@nats-io/transport-node");
-    nc = await mod.connect({ servers: server, maxReconnectAttempts: 0 });
   } else {
-    const mod = await import("@nats-io/transport-deno");
-    nc = await mod.connect({ servers: server, maxReconnectAttempts: 0 });
+    nc = await tcpConnect(
+      { servers: server, maxReconnectAttempts: 0 },
+      { runtime, transportNode },
+    );
   }
   try {
     const { jetstreamManager } = await import("@nats-io/jetstream");
@@ -1204,7 +1194,7 @@ async function writeOutputFile(path, content) {
   if (typeof Deno !== "undefined") {
     await Deno.writeTextFile(path, content);
   } else {
-    const { writeFile } = await import("fs/promises");
+    const { writeFile } = await import("node:fs/promises");
     await writeFile(path, content);
   }
 }
