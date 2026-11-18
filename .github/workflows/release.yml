@@ -36,7 +36,7 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: 2.9.x
-      - run: npm install
+      - run: npm ci
       - name: Sources parse
         run: |
           node --check bench.js
@@ -47,7 +47,7 @@ jobs:
           PKG="v$(node -p "require('./package.json').version")"
           if [ "$VER" != "$PKG" ]; then echo "tag $VER != package.json $PKG"; exit 1; fi
       - name: Versions agree (deno.json, package.json)
-        run: npx -y @aricart/mrvm@0.1.1 check
+        run: npx -y @aricart/mrvm@0.1.2 check
       - name: Publish JSR
         run: deno publish
       - name: Publish NPM
