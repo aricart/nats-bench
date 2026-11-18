@@ -258,7 +258,7 @@ async function runWithWorkers(command, jobConfig, jobOpts, sharedBars = null) {
 
 // create root command
 const root = cli({
-  use: "bench <command> [subject]",
+  use: "bench",
   short: "NATS benchmarking tool (JavaScript)",
   long: `Benchmark utility for NATS messaging
 
@@ -269,7 +269,7 @@ Available runtimes:
 
 Examples:
   bench pub test --msgs 1000000
-  bench sub test --clients 5
+  bench sub test --workers 5
   bench pub test --ws --json results.json`,
 });
 
@@ -278,7 +278,7 @@ root.addFlag({
   short: "s",
   name: "server",
   type: "string",
-  usage: "NATS server URL (default: localhost:4222)",
+  usage: "NATS server URL",
   default: "localhost:4222",
   persistent: true,
 });
@@ -286,7 +286,7 @@ root.addFlag({
 root.addFlag({
   name: "ws",
   type: "boolean",
-  usage: "Use WebSocket transport (default: false)",
+  usage: "Use WebSocket transport",
   default: false,
   persistent: true,
 });
@@ -294,7 +294,7 @@ root.addFlag({
 root.addFlag({
   name: "transport-node",
   type: "boolean",
-  usage: "Use Node.js transport (default: auto, useful for Deno benchmarks)",
+  usage: "Use the Node.js transport under Deno (Node.js and Bun always use it)",
   default: false,
   persistent: true,
 });
@@ -410,49 +410,49 @@ Examples:
 pub.addFlag({
   name: "workers",
   type: "number",
-  usage: "Number of workers (default: 1)",
+  usage: "Number of workers",
   default: 1,
 });
 
 pub.addFlag({
   name: "msgs",
   type: "number",
-  usage: "Number of messages to publish (default: 100000)",
+  usage: "Number of messages to publish",
   default: 100000,
 });
 
 pub.addFlag({
   name: "size",
   type: "number",
-  usage: "Size of the test messages (default: 128)",
+  usage: "Size of the test messages",
   default: 128,
 });
 
 pub.addFlag({
   name: "multisubject",
   type: "boolean",
-  usage: "Multi-subject mode, publish to subject.<seq> (default: false)",
+  usage: "Multi-subject mode, publish to subject.<seq>",
   default: false,
 });
 
 pub.addFlag({
   name: "payload",
   type: "string",
-  usage: "Custom message payload (default: empty)",
+  usage: "Custom message payload",
   default: "",
 });
 
 pub.addFlag({
   name: "warmup",
   type: "boolean",
-  usage: "Run warmup before benchmark (default: false)",
+  usage: "Run warmup before benchmark",
   default: false,
 });
 
 pub.addFlag({
   name: "iterations",
   type: "number",
-  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev",
   default: 1,
 });
 
@@ -543,28 +543,28 @@ Examples:
 sub.addFlag({
   name: "workers",
   type: "number",
-  usage: "Number of workers (default: 1)",
+  usage: "Number of workers",
   default: 1,
 });
 
 sub.addFlag({
   name: "msgs",
   type: "number",
-  usage: "Number of messages to subscribe to (default: 100000)",
+  usage: "Number of messages to subscribe to",
   default: 100000,
 });
 
 sub.addFlag({
   name: "size",
   type: "number",
-  usage: "Size of the test messages (default: 128)",
+  usage: "Size of the test messages",
   default: 128,
 });
 
 sub.addFlag({
   name: "iterations",
   type: "number",
-  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev",
   default: 1,
 });
 
@@ -722,49 +722,49 @@ Examples:
 pubsub.addFlag({
   name: "pubworkers",
   type: "number",
-  usage: "Number of publisher workers (default: 1)",
+  usage: "Number of publisher workers",
   default: 1,
 });
 
 pubsub.addFlag({
   name: "subworkers",
   type: "number",
-  usage: "Number of subscriber workers (default: 1)",
+  usage: "Number of subscriber workers",
   default: 1,
 });
 
 pubsub.addFlag({
   name: "msgs",
   type: "number",
-  usage: "Number of messages to publish/subscribe (default: 100000)",
+  usage: "Number of messages to publish/subscribe",
   default: 100000,
 });
 
 pubsub.addFlag({
   name: "size",
   type: "number",
-  usage: "Size of the test messages (default: 128)",
+  usage: "Size of the test messages",
   default: 128,
 });
 
 pubsub.addFlag({
   name: "multisubject",
   type: "boolean",
-  usage: "Multi-subject mode, publish to subject.<seq> (default: false)",
+  usage: "Multi-subject mode, publish to subject.<seq>",
   default: false,
 });
 
 pubsub.addFlag({
   name: "payload",
   type: "string",
-  usage: "Custom message payload (default: empty)",
+  usage: "Custom message payload",
   default: "",
 });
 
 pubsub.addFlag({
   name: "iterations",
   type: "number",
-  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev",
   default: 1,
 });
 
@@ -779,7 +779,7 @@ const kv = root.addCommand({
 kv.addFlag({
   name: "bucket",
   type: "string",
-  usage: "KV bucket name (default: benchbucket)",
+  usage: "KV bucket name",
   default: "benchbucket",
   persistent: true,
 });
@@ -787,7 +787,7 @@ kv.addFlag({
 kv.addFlag({
   name: "workers",
   type: "number",
-  usage: "Number of workers (default: 1)",
+  usage: "Number of workers",
   default: 1,
   persistent: true,
 });
@@ -795,7 +795,7 @@ kv.addFlag({
 kv.addFlag({
   name: "msgs",
   type: "number",
-  usage: "Number of key-value operations (default: 100000)",
+  usage: "Number of key-value operations",
   default: 100000,
   persistent: true,
 });
@@ -803,7 +803,7 @@ kv.addFlag({
 kv.addFlag({
   name: "size",
   type: "number",
-  usage: "Size of the values for put (default: 128)",
+  usage: "Size of the values for put",
   default: 128,
   persistent: true,
 });
@@ -811,7 +811,7 @@ kv.addFlag({
 kv.addFlag({
   name: "keyprefix",
   type: "string",
-  usage: "Key prefix (default: empty)",
+  usage: "Key prefix",
   default: "",
   persistent: true,
 });
@@ -819,7 +819,7 @@ kv.addFlag({
 kv.addFlag({
   name: "sleep",
   type: "number",
-  usage: "Sleep between operations in ms (default: 0)",
+  usage: "Sleep between operations in ms",
   default: 0,
   persistent: true,
 });
@@ -827,7 +827,7 @@ kv.addFlag({
 kv.addFlag({
   name: "payload",
   type: "string",
-  usage: "Custom value payload for put (default: empty)",
+  usage: "Custom value payload for put",
   default: "",
   persistent: true,
 });
@@ -835,7 +835,7 @@ kv.addFlag({
 kv.addFlag({
   name: "randomize",
   type: "number",
-  usage: "Randomize gets from 0 to n-1 for get (default: 0 for sequential)",
+  usage: "Get random keys from 0 to n-1; 0 gets them in order",
   default: 0,
   persistent: true,
 });
@@ -843,7 +843,7 @@ kv.addFlag({
 kv.addFlag({
   name: "iterations",
   type: "number",
-  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev",
   default: 1,
   persistent: true,
 });
@@ -1001,7 +1001,7 @@ const js = root.addCommand({
 js.addFlag({
   name: "stream",
   type: "string",
-  usage: "Stream name (default: benchstream)",
+  usage: "Stream name",
   default: "benchstream",
   persistent: true,
 });
@@ -1009,7 +1009,7 @@ js.addFlag({
 js.addFlag({
   name: "workers",
   type: "number",
-  usage: "Number of workers (default: 1)",
+  usage: "Number of workers",
   default: 1,
   persistent: true,
 });
@@ -1017,7 +1017,7 @@ js.addFlag({
 js.addFlag({
   name: "msgs",
   type: "number",
-  usage: "Number of messages (default: 100000)",
+  usage: "Number of messages",
   default: 100000,
   persistent: true,
 });
@@ -1025,7 +1025,7 @@ js.addFlag({
 js.addFlag({
   name: "size",
   type: "number",
-  usage: "Size of the messages (default: 128)",
+  usage: "Size of the messages",
   default: 128,
   persistent: true,
 });
@@ -1033,7 +1033,7 @@ js.addFlag({
 js.addFlag({
   name: "sleep",
   type: "number",
-  usage: "Sleep between operations in ms (default: 0)",
+  usage: "Sleep between operations in ms",
   default: 0,
   persistent: true,
 });
@@ -1041,7 +1041,7 @@ js.addFlag({
 js.addFlag({
   name: "purge",
   type: "boolean",
-  usage: "Purge the stream before running (default: false)",
+  usage: "Purge the stream before running",
   default: false,
   persistent: true,
 });
@@ -1049,7 +1049,7 @@ js.addFlag({
 js.addFlag({
   name: "payload",
   type: "string",
-  usage: "Custom message payload (default: empty)",
+  usage: "Custom message payload",
   default: "",
   persistent: true,
 });
@@ -1057,7 +1057,7 @@ js.addFlag({
 js.addFlag({
   name: "iterations",
   type: "number",
-  usage: "Number of bench iterations; reports min/median/mean/max/stddev (default: 1)",
+  usage: "Number of bench iterations; reports min/median/mean/max/stddev",
   default: 1,
   persistent: true,
 });
@@ -1153,21 +1153,21 @@ Examples:
 jspub.addFlag({
   name: "multisubject",
   type: "boolean",
-  usage: "Multi-subject mode (default: false)",
+  usage: "Multi-subject mode",
   default: false,
 });
 
 jspub.addFlag({
   name: "multisubjectmax",
   type: "number",
-  usage: "Maximum number of subjects in multi-subject mode (default: 100000)",
+  usage: "Maximum number of subjects in multi-subject mode",
   default: 100000,
 });
 
 jspub.addFlag({
   name: "batch",
   type: "number",
-  usage: "Batch size for async publish (default: 500)",
+  usage: "Batch size for async publish",
   default: 500,
 });
 
@@ -1338,7 +1338,7 @@ Examples:
 jsordered.addFlag({
   name: "callback",
   type: "boolean",
-  usage: "Use callback API instead of iterator (default: false)",
+  usage: "Use callback API instead of iterator",
   default: false,
 });
 
@@ -1356,19 +1356,19 @@ Examples:
 jsconsume.addFlag({
   name: "consumer",
   type: "string",
-  usage: "Durable consumer name (default: nats-bench)",
+  usage: "Durable consumer name",
   default: "nats-bench",
 });
 jsconsume.addFlag({
   name: "batch",
   type: "number",
-  usage: "Max messages per consume batch (default: 500)",
+  usage: "Max messages per consume batch",
   default: 500,
 });
 jsconsume.addFlag({
   name: "callback",
   type: "boolean",
-  usage: "Use callback API instead of iterator (default: false)",
+  usage: "Use callback API instead of iterator",
   default: false,
 });
 
@@ -1385,13 +1385,13 @@ Examples:
 jsfetch.addFlag({
   name: "consumer",
   type: "string",
-  usage: "Durable consumer name (default: nats-bench)",
+  usage: "Durable consumer name",
   default: "nats-bench",
 });
 jsfetch.addFlag({
   name: "batch",
   type: "number",
-  usage: "Messages per fetch (default: 100)",
+  usage: "Messages per fetch",
   default: 100,
 });
 

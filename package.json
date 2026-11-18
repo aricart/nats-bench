@@ -1,7 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "@aricart/cobra": "npm:@jsr/aricart__cobra@^0.1.2",
+    "@aricart/cobra": "^0.2.0",
     "@nats-io/jetstream": "3.5.0",
     "@nats-io/kv": "3.5.0",
     "@nats-io/nats-core": "3.5.0",
