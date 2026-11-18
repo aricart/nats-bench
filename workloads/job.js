@@ -30,7 +30,6 @@ export async function runJob(nc, command, config, progressReporter) {
     opts.numMsgs = config.msgsPerClient;
     opts.msgSize = config.msgSize;
     opts.multiSubject = config.multiSubject || false;
-    opts.progress = false; // disable built-in progress
     opts.warmup = config.warmup || false;
     if (config.payload) {
       opts.payload = config.payload;

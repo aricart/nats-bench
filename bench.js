@@ -103,12 +103,6 @@ async function importBenchFunctions() {
   return mod;
 }
 
-// import progress factory directly
-async function importProgressFactory() {
-  const mod = await import("@aricart/nd-progress");
-  return mod.progressFactory;
-}
-
 // distribute messages across clients as evenly as possible
 function distributeMsgs(total, clients) {
   const distribution = [];
@@ -123,8 +117,28 @@ function distributeMsgs(total, clients) {
 }
 
 // run benchmark with workers
-// builds job description and distributes to workers
-async function runWithWorkers(command, jobConfig, jobOpts) {
+// one set of progress bars on the terminal; pubsub shares one between its
+// pub and sub workers, so the bars don't redraw over each other
+async function createMultibar() {
+  const cliProgress = await import("cli-progress");
+  return new cliProgress.default.MultiBar({
+    clearOnComplete: false,
+    hideCursor: true,
+    format: " {label} [{bar}] {percentage}% | {value}/{total} | {duration_formatted}",
+  }, cliProgress.default.Presets.shades_classic);
+}
+
+// one bar per worker. cli-progress doesn't redraw well when bars are added to
+// a running multibar, so callers sharing one create all the bars up front
+function createBars(multibar, command, numClients, numMsgs) {
+  return distributeMsgs(numMsgs, numClients).map((n, i) =>
+    multibar.create(n, 0, { label: `${command} ${i + 1}`.padEnd(6) })
+  );
+}
+
+// builds job description and distributes to workers. with shared bars the
+// caller stops their multibar, otherwise the bars are made and stopped here
+async function runWithWorkers(command, jobConfig, jobOpts, sharedBars = null) {
   const runtime = detectRuntime();
   const { Benchmark, BenchSample } = await importBenchFunctions();
   const benchmark = new Benchmark("NATS", command.toUpperCase(), jobOpts.numClients);
@@ -132,21 +146,9 @@ async function runWithWorkers(command, jobConfig, jobOpts) {
   // distribute messages across workers
   const msgsPerClient = distributeMsgs(jobOpts.numMsgs, jobOpts.numClients);
 
-  // import cli-progress for multi-bar
-  const cliProgress = await import("cli-progress");
-
-  // create multibar for progress tracking
-  const multibar = new cliProgress.default.MultiBar({
-    clearOnComplete: false,
-    hideCursor: true,
-  }, cliProgress.default.Presets.shades_classic);
-
-  // create progress bars for each worker
-  const progressBars = [];
-  for (let i = 0; i < jobOpts.numClients; i++) {
-    const bar = multibar.create(msgsPerClient[i], 0);
-    progressBars.push(bar);
-  }
+  const multibar = sharedBars ? null : await createMultibar();
+  const progressBars = sharedBars ??
+    createBars(multibar, command, jobOpts.numClients, jobOpts.numMsgs);
 
   // create workers and distribute job
   const workers = [];
@@ -246,8 +248,7 @@ async function runWithWorkers(command, jobConfig, jobOpts) {
   // wait for all workers to return
   const samples = await Promise.all(workerPromises);
 
-  // stop multibar
-  multibar.stop();
+  if (multibar) multibar.stop();
 
   // aggregate results
   samples.forEach((s) => benchmark.addSample(s));
@@ -662,10 +663,15 @@ Examples:
 
       for (let i = 0; i < iterations; i++) {
         if (iterations > 1) cmd.stdout(`\n>>> iteration ${i + 1}/${iterations}\n`);
-        const subPromise = runWithWorkers("sub", subJobConfig, subJobOpts);
+        // all the bars exist before any worker starts
+        const multibar = await createMultibar();
+        const subBars = createBars(multibar, "sub", subJobOpts.numClients, subJobOpts.numMsgs);
+        const pubBars = createBars(multibar, "pub", pubJobOpts.numClients, pubJobOpts.numMsgs);
+        const subPromise = runWithWorkers("sub", subJobConfig, subJobOpts, subBars);
         await new Promise(resolve => setTimeout(resolve, 1000));
-        const pubPromise = runWithWorkers("pub", pubJobConfig, pubJobOpts);
-        const [subBm, pubBm] = await Promise.all([subPromise, pubPromise]);
+        const pubPromise = runWithWorkers("pub", pubJobConfig, pubJobOpts, pubBars);
+        const [subBm, pubBm] = await Promise.all([subPromise, pubPromise])
+          .finally(() => multibar.stop());
         pubBm.setMetadata(pubMeta);
         subBm.setMetadata(subMeta);
         pubGroup.add(pubBm);

@@ -2,7 +2,6 @@
 // based on nats-cli bench command
 
 import { Benchmark, BenchSample, BenchType, now } from "./stats.js";
-import { progressFactory } from "@aricart/nd-progress";
 import { nuid } from "@nats-io/nats-core";
 
 export class PubBenchOptions {
@@ -14,7 +13,6 @@ export class PubBenchOptions {
     this.payload = null; // optional fixed payload
     this.multiSubject = false; // publish to subject.<seq>
     this.headers = null; // optional headers map
-    this.progress = true; // show progress bar
     this.warmup = false; // run warmup before benchmark
   }
 }
@@ -36,7 +34,8 @@ export async function benchPub(nc, opts = new PubBenchOptions(), externalProgres
 
   // for single client, run directly without worker overhead
   if (opts.numClients === 1) {
-    const progress = externalProgress || (opts.progress !== false ? await progressFactory(opts.numMsgs) : null);
+    // progress is drawn by the caller (bench.js), if at all
+    const progress = externalProgress;
     const sample = await runPublisher(
       nc,
       opts.subject,
