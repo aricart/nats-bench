@@ -1,6 +1,14 @@
 // statistics tracking for benchmarks
 // based on nats-cli internal/bench/stats.go
 
+// the clock for sample start/end. it is high resolution like performance.now(),
+// and absolute like Date.now(): worker threads each have their own
+// performance.now() origin, and a sample group compares start/end across
+// workers, so the origin has to be added back in.
+export function now() {
+  return performance.timeOrigin + performance.now();
+}
+
 export const BenchType = {
   PUB: "PUB",
   SUB: "SUB",

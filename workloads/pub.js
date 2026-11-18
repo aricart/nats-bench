@@ -1,7 +1,7 @@
 // core nats publish benchmark
 // based on nats-cli bench command
 
-import { Benchmark, BenchSample, BenchType } from "./stats.js";
+import { Benchmark, BenchSample, BenchType, now } from "./stats.js";
 import { progressFactory } from "@aricart/nd-progress";
 import { nuid } from "@nats-io/nats-core";
 
@@ -88,7 +88,7 @@ async function runPublisher(
     await nc.flush();
   }
 
-  sample.start = performance.now();
+  sample.start = now();
 
   for (let i = 0; i < msgCount; i++) {
     const subj = multiSubject ? `${subject}.${i}` : subject;
@@ -128,7 +128,7 @@ async function runPublisher(
     clearInterval(interval);
   }
 
-  sample.end = performance.now();
+  sample.end = now();
 
   // final update to show 100%
   if (progress) {

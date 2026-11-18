@@ -2,7 +2,7 @@
 // based on nats-cli bench js pub command
 // uses @nats-io/jetstream for proper jetstream implementation
 
-import { Benchmark, BenchSample, BenchType } from "./stats.js";
+import { Benchmark, BenchSample, BenchType, now } from "./stats.js";
 
 export class JSPubSyncOptions {
   constructor() {
@@ -113,7 +113,7 @@ async function runJSPubSync(nc, js, opts, offset) {
   // prepare payload
   const payload = opts.payload || new Uint8Array(opts.msgSize);
 
-  sample.start = Date.now();
+  sample.start = now();
 
   for (let i = 0; i < opts.numMsgs; i++) {
     const subject = opts.multiSubject
@@ -127,7 +127,7 @@ async function runJSPubSync(nc, js, opts, offset) {
     sample.msgBytes += payload.length;
   }
 
-  sample.end = Date.now();
+  sample.end = now();
 
   return sample;
 }
@@ -139,7 +139,7 @@ async function runJSPubAsync(nc, js, opts, offset, progress) {
   // prepare payload
   const payload = opts.payload || new Uint8Array(opts.msgSize);
 
-  sample.start = Date.now();
+  sample.start = now();
 
   const allPubs = [];
   const batchSize = opts.asyncBatch;
@@ -171,7 +171,7 @@ async function runJSPubAsync(nc, js, opts, offset, progress) {
     await Promise.all(allPubs);
   }
 
-  sample.end = Date.now();
+  sample.end = now();
 
   // final progress update
   if (progress) {
@@ -188,7 +188,7 @@ async function runJSPubBatch(nc, js, opts, offset) {
   // prepare payload
   const payload = opts.payload || new Uint8Array(opts.msgSize);
 
-  sample.start = Date.now();
+  sample.start = now();
 
   let sent = 0;
 
@@ -237,7 +237,7 @@ async function runJSPubBatch(nc, js, opts, offset) {
     }
   }
 
-  sample.end = Date.now();
+  sample.end = now();
 
   return sample;
 }

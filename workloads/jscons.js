@@ -2,7 +2,7 @@
 // based on nats-cli bench js ordered/consume/fetch commands
 // uses @nats-io/jetstream for proper jetstream implementation
 
-import { Benchmark, BenchSample, BenchType } from "./stats.js";
+import { Benchmark, BenchSample, BenchType, now } from "./stats.js";
 
 export class JSConsOrderedOptions {
   constructor() {
@@ -120,7 +120,7 @@ async function runJSConsOrdered(nc, js, opts, offset) {
   // get ordered consumer (no name required, library creates ephemeral)
   const consumer = await js.consumers.get(opts.stream);
 
-  sample.start = Date.now();
+  sample.start = now();
 
   if (opts.useCallback) {
     // callback-based consumption (faster)
@@ -135,7 +135,7 @@ async function runJSConsOrdered(nc, js, opts, offset) {
           msg.ack();
 
           if (count >= opts.numMsgs) {
-            sample.end = Date.now();
+            sample.end = now();
             resolve(sample);
           }
         },
@@ -159,7 +159,7 @@ async function runJSConsOrdered(nc, js, opts, offset) {
       }
     }
 
-    sample.end = Date.now();
+    sample.end = now();
 
     // stop the consumer
     iter.stop();
@@ -188,7 +188,7 @@ async function runJSConsConsume(nc, js, jsm, opts, offset) {
     consumer = await js.consumers.get(opts.stream, opts.consumer);
   }
 
-  sample.start = Date.now();
+  sample.start = now();
 
   if (opts.useCallback) {
     // callback-based consumption (faster)
@@ -204,7 +204,7 @@ async function runJSConsConsume(nc, js, jsm, opts, offset) {
           msg.ack();
 
           if (count >= opts.numMsgs) {
-            sample.end = Date.now();
+            sample.end = now();
             resolve(sample);
           }
         },
@@ -231,7 +231,7 @@ async function runJSConsConsume(nc, js, jsm, opts, offset) {
       }
     }
 
-    sample.end = Date.now();
+    sample.end = now();
 
     // stop the consumer
     iter.stop();
@@ -260,7 +260,7 @@ async function runJSConsFetch(nc, js, jsm, opts, offset) {
     consumer = await js.consumers.get(opts.stream, opts.consumer);
   }
 
-  sample.start = Date.now();
+  sample.start = now();
 
   let count = 0;
 
@@ -287,7 +287,7 @@ async function runJSConsFetch(nc, js, jsm, opts, offset) {
     }
   }
 
-  sample.end = Date.now();
+  sample.end = now();
 
   return sample;
 }

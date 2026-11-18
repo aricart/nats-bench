@@ -1,7 +1,7 @@
 // core nats subscribe benchmark
 // based on nats-cli bench command
 
-import { Benchmark, BenchSample, BenchType } from "./stats.js";
+import { Benchmark, BenchSample, BenchType, now } from "./stats.js";
 
 export class SubBenchOptions {
   constructor() {
@@ -48,7 +48,7 @@ async function runSubscriberCallback(nc, subject, msgCount, progress) {
       }
 
       if (received === 0) {
-        sample.start = Date.now();
+        sample.start = now();
       }
 
       received++;
@@ -61,7 +61,7 @@ async function runSubscriberCallback(nc, subject, msgCount, progress) {
       }
 
       if (received >= msgCount) {
-        sample.end = Date.now();
+        sample.end = now();
         sub.unsubscribe();
         if (progress) {
           progress.update(msgCount);
@@ -85,7 +85,7 @@ async function runSubscriberIterator(nc, subject, msgCount, progress) {
 
   const sub = nc.subscribe(subject);
 
-  sample.start = Date.now();
+  sample.start = now();
 
   for await (const msg of sub) {
     received++;
@@ -98,7 +98,7 @@ async function runSubscriberIterator(nc, subject, msgCount, progress) {
     }
 
     if (received >= msgCount) {
-      sample.end = Date.now();
+      sample.end = now();
       sub.unsubscribe();
       if (progress) {
         progress.update(msgCount);

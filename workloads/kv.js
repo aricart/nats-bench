@@ -2,7 +2,7 @@
 // based on nats-cli bench kv command
 // uses @nats-io/kv module
 
-import { Benchmark, BenchSample, BenchType } from "./stats.js";
+import { Benchmark, BenchSample, BenchType, now } from "./stats.js";
 
 export class KVPutOptions {
   constructor() {
@@ -70,7 +70,7 @@ async function runKvPuts(nc, kvm, opts, offset, progress) {
   // create or open bucket using Kvm
   const kv = await kvm.create(opts.bucket);
 
-  sample.start = Date.now();
+  sample.start = now();
 
   for (let i = 0; i < opts.numMsgs; i++) {
     const key = `${opts.keyPrefix}${offset + i}`;
@@ -91,7 +91,7 @@ async function runKvPuts(nc, kvm, opts, offset, progress) {
     }
   }
 
-  sample.end = Date.now();
+  sample.end = now();
 
   // final progress update
   if (progress) {
@@ -108,7 +108,7 @@ async function runKvGets(nc, kvm, opts, offset, progress) {
   // open bucket using Kvm
   const kv = await kvm.open(opts.bucket);
 
-  sample.start = Date.now();
+  sample.start = now();
 
   for (let i = 0; i < opts.numMsgs; i++) {
     let key;
@@ -140,7 +140,7 @@ async function runKvGets(nc, kvm, opts, offset, progress) {
     }
   }
 
-  sample.end = Date.now();
+  sample.end = now();
 
   // final progress update
   if (progress) {
