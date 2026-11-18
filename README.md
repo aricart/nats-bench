@@ -25,6 +25,35 @@ A NATS benchmarking tool written in JavaScript, implementing functionality simil
 - **Export**: CSV and JSON output formats
 - **Multi-subject**: publish to `subject.<seq>` pattern
 
+## Running it without installing
+
+The bench is published as `@aricart/nats-bench`, on npm (with a `nats-bench`
+command) and on JSR:
+
+```bash
+# node
+npx @aricart/nats-bench pub test --msgs 100000
+
+# bun
+bunx @aricart/nats-bench pub test --msgs 100000
+
+# deno, from jsr: tcp with the deno transport
+deno run -A jsr:@aricart/nats-bench/cli pub test --msgs 100000
+
+# deno, from npm: tcp with the node.js transport
+deno run -A npm:@aricart/nats-bench pub test --msgs 100000
+```
+
+Every command and flag below works the same way; replace `node bench.js` with
+one of these. Under Deno, TCP connections use `@nats-io/transport-deno` when
+it's available (from JSR, or a checkout of this repository), and
+`@nats-io/transport-node` otherwise (from npm: `transport-deno` is published on
+JSR only). `--transport-node` picks the Node.js transport explicitly, to compare
+the two.
+
+Deno won't install versions published in the last 24 hours; pass
+`--minimum-dependency-age=0` to `deno run` to use a release the day it's out.
+
 ## Setup
 
 ### Install Dependencies

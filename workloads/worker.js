@@ -46,16 +46,12 @@ onMessage(async (data) => {
       const url = config.server.startsWith("ws://") ? config.server : `ws://${config.server}`;
       nc = await wsconnect({ servers: url, maxReconnectAttempts: 0 });
     } else {
-      // use runtime-specific transport
-      if (config.transportNode || runtime === "node" || runtime === "bun") {
-        const mod = await import("@nats-io/transport-node");
-        const { connect } = mod;
-        nc = await connect({ servers: config.server, maxReconnectAttempts: 0 });
-      } else {
-        const mod = await import("@nats-io/transport-deno");
-        const { connect } = mod;
-        nc = await connect({ servers: config.server, maxReconnectAttempts: 0 });
-      }
+      // the runtime's tcp transport
+      const { tcpConnect } = await import("./transport.js");
+      nc = await tcpConnect(
+        { servers: config.server, maxReconnectAttempts: 0 },
+        { runtime, transportNode: config.transportNode },
+      );
     }
 
     // run the job, shared with the browser runner

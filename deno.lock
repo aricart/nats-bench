@@ -51,7 +51,6 @@
     "npm:@nats-io/transport-node@3.4.0": "3.4.0",
     "npm:@nats-io/transport-node@3.5.0": "3.5.0",
     "npm:cli-progress@^3.12.0": "3.12.0",
-    "npm:minimist@^1.2.8": "1.2.8",
     "npm:tweetnacl@1.0.3": "1.0.3"
   },
   "jsr": {
@@ -409,9 +408,6 @@
     "is-fullwidth-code-point@3.0.0": {
       "integrity": "sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg=="
     },
-    "minimist@1.2.8": {
-      "integrity": "sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA=="
-    },
     "string-width@4.2.3": {
       "integrity": "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==",
       "dependencies": [
@@ -437,7 +433,8 @@
       "jsr:@nats-io/kv@3.5.0",
       "jsr:@nats-io/nats-core@3.5.0",
       "jsr:@nats-io/transport-deno@3.5.0",
-      "npm:@nats-io/transport-node@3.5.0"
+      "npm:@nats-io/transport-node@3.5.0",
+      "npm:cli-progress@^3.12.0"
     ],
     "packageJson": {
       "dependencies": [
@@ -446,8 +443,7 @@
         "npm:@nats-io/kv@3.5.0",
         "npm:@nats-io/nats-core@3.5.0",
         "npm:@nats-io/transport-node@3.5.0",
-        "npm:cli-progress@^3.12.0",
-        "npm:minimist@^1.2.8"
+        "npm:cli-progress@^3.12.0"
       ]
     }
   }
