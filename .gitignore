@@ -3,3 +3,4 @@
 results/
 *.conf
 node_modules/
+.versions/

@@ -2,7 +2,7 @@
 // based on nats-cli bench service command
 // uses @nats-io/services for proper service implementation
 
-import { Benchmark, BenchSample, BenchType } from "./stats.js";
+import { Benchmark, BenchSample, BenchType, now } from "./stats.js";
 
 export class ServiceRequestOptions {
   constructor() {
@@ -84,7 +84,7 @@ async function runRequester(nc, opts) {
   // prepare headers if provided
   const headers = opts.headers ? { ...opts.headers } : undefined;
 
-  sample.start = Date.now();
+  sample.start = now();
 
   if (opts.async) {
     // async mode: send requests in batches without waiting for each reply
@@ -136,7 +136,7 @@ async function runRequester(nc, opts) {
     }
   }
 
-  sample.end = Date.now();
+  sample.end = now();
 
   return sample;
 }
@@ -172,7 +172,7 @@ async function runServer(nc, svcm, opts) {
       }
 
       if (received === 0) {
-        sample.start = Date.now();
+        sample.start = now();
       }
 
       // optional sleep before replying
@@ -189,7 +189,7 @@ async function runServer(nc, svcm, opts) {
       sample.ioBytes += replyPayload.length; // count reply bytes sent
 
       if (received >= opts.numMsgs) {
-        sample.end = Date.now();
+        sample.end = now();
         // stop the service when done
         await service.stop();
         done.resolve();

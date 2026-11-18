@@ -15,7 +15,7 @@ A NATS benchmarking tool written in JavaScript, implementing functionality simil
 ## Features
 
 - **Core NATS**: pub, sub, pubsub (simultaneous pub/sub)
-- **JetStream**: pub with async batching
+- **JetStream**: pub with async batching; ordered, consume and fetch consumers
 - **KV**: put and get operations with sequential or random access
 - **Multi-worker support**: true parallelism using worker threads (Node/Bun) or Web Workers (Deno)
 - **Cross-runtime**: works with Node.js, Deno, and Bun
@@ -28,6 +28,8 @@ A NATS benchmarking tool written in JavaScript, implementing functionality simil
 ## Setup
 
 ### Install Dependencies
+
+Node.js and Bun need the npm dependencies; Deno resolves its own on first run.
 
 ```bash
 npm install
@@ -80,6 +82,11 @@ node bench.js js pub bench --workers 10 --msgs 1000000 --batch 1000
 
 # Multi-subject JetStream publish
 node bench.js js pub bench --multisubject --msgs 100000
+
+# Consume what was published (ordered, durable consume, durable fetch)
+node bench.js js ordered bench --stream benchstream --msgs 100000
+node bench.js js consume bench --stream benchstream --msgs 100000 --batch 500
+node bench.js js fetch bench --stream benchstream --msgs 100000 --batch 100
 ```
 
 ### KV Benchmarks
@@ -123,6 +130,17 @@ bun bench.js pub test --workers 10 --msgs 1000000
 
 ### Transport Options
 
+Which transport a connection uses:
+
+| Runtime | TCP (default) | `--transport-node` | `--ws` |
+|---------|---------------|--------------------|--------|
+| Node.js | `@nats-io/transport-node` | same | `wsconnect` (nats-core) |
+| Bun | `@nats-io/transport-node` | same | `wsconnect` (nats-core) |
+| Deno | `@nats-io/transport-deno` | `@nats-io/transport-node` | `wsconnect` (nats-core) |
+
+The server's `/connz` reports `nats.deno` for the Deno transport and `nats.js`
+for the Node.js one. History runs (`bin/history.js`) use the defaults.
+
 ```bash
 # Use WebSocket transport
 node bench.js pub test --ws --server localhost:9222
@@ -155,9 +173,9 @@ node bench.js pub test --csv results.csv --json results.json
 ### JetStream
 
 - `js pub <subject>` - Publish messages to JetStream
-- `js ordered` - Consume with ordered consumer (coming soon)
-- `js consume` - Consume with durable consumer (coming soon)
-- `js fetch` - Fetch-based consumption (coming soon)
+- `js ordered <subject>` - Consume with an ephemeral ordered consumer
+- `js consume <subject>` - Consume from a durable pull consumer
+- `js fetch <subject>` - Consume from a durable pull consumer using fetch
 
 ### KV (Key-Value)
 
@@ -183,9 +201,10 @@ node bench.js pub test --csv results.csv --json results.json
 --workers <n>           Number of workers (default: 1)
 --msgs <n>              Number of messages (default: 100000)
 --size <n>              Message size in bytes (default: 128)
---payload <string>      Custom payload (overrides --size)
---multisubject          Publish to subject.<seq> (pub only)
---multisubjectmax <n>   Max subjects in multi-subject mode (default: 100000)
+--iterations <n>        Repeat the bench; reports min/median/mean/max/stddev (default: 1)
+--payload <string>      Custom payload (overrides --size; pub and pubsub)
+--multisubject          Publish to subject.<seq> (pub and pubsub)
+--warmup                Publish 1000 messages to another subject first (pub only)
 ```
 
 ### pubsub
@@ -204,6 +223,8 @@ node bench.js pub test --csv results.csv --json results.json
 --size <n>              Message size in bytes (default: 128)
 --batch <n>             Batch size for async publish (default: 500)
 --multisubject          Multi-subject mode (default: false)
+--multisubjectmax <n>   Max subjects in multi-subject mode (default: 100000)
+--iterations <n>        Repeat the bench (default: 1)
 --purge                 Purge stream before running (default: false)
 --sleep <ms>            Sleep between operations in ms (default: 0)
 ```
@@ -217,6 +238,17 @@ node bench.js pub test --csv results.csv --json results.json
 --size <n>              Value size for put (default: 128)
 --keyprefix <prefix>    Key prefix (default: empty)
 --sleep <ms>            Sleep between operations in ms (default: 0)
+--iterations <n>        Repeat the bench (default: 1)
+```
+
+### js ordered / consume / fetch
+
+Besides the `js` flags (`--stream`, `--workers`, `--msgs`, `--iterations`, ...):
+
+```
+--consumer <name>       Durable consumer name (consume, fetch; default: nats-bench)
+--batch <n>             Max messages per batch (consume: 500, fetch: 100)
+--callback              Use the callback API instead of the iterator (ordered, consume)
 ```
 
 ### kv put
@@ -258,12 +290,78 @@ CSV/JSON export includes:
 - Per-worker metrics (messages, bytes, throughput, duration)
 - Aggregate statistics
 
+## Client Versions and History
+
+The bench runs the latest nats.js release by default (the `@nats-io` versions
+in `package.json` and `deno.json`). To compare releases, every released 3.x
+version can be installed side by side and run as a matrix.
+
+```bash
+# install released versions under .versions/ (gitignored)
+node bin/versions.js list
+node bin/versions.js install all
+
+# run every client version x runtime (node, deno, bun, browser) x workload
+node bin/history.js
+node bin/history.js --clients 3.4.0,3.5.0 --runtimes node,browser --iterations 5
+
+# tables, and a chart page per run (history/<run-id>/report.html)
+node bin/report.js
+```
+
+The workloads are small, over TCP and WebSocket, enough to spot a regression
+between releases. Every workload with a payload runs at 0, 8, 32, 64 and 128
+bytes (`--sizes 0,8,32,64,128`). By default they are core NATS only
+(`--workloads core`):
+
+- `pub`: publish 50k messages
+- `pubsub`: a js publisher and a js subscriber at the same time
+
+The Go client is the 100% baseline: every core workload also runs with
+`nats bench` (the nats CLI, nats.go) with the same message count, size and
+transport, and the report shows every value as a percentage
+of Go for the same workload, size and transport. It is skipped if `nats`
+isn't on the PATH (or `$NATS_CLI`). `nats bench` rejects `--size 0`, so for
+0-byte messages it publishes an empty `--payload` file instead.
+
+`--workloads js` runs JetStream publish and KV put/get instead, and
+`--workloads all` runs both; JetStream is only enabled on the server when a
+JetStream workload runs.
+
+Each run starts
+its own nats-server and writes one record per combination to
+`history/<run-id>/`, with the host, the server version, the client version
+(checked against the server's `/connz`), the runtime and its version, the
+transport and the workload, next to the bench's own JSON. Records from
+different runs can be compared on any of those.
+
+How a version is selected:
+
+- Node and Bun: `.versions/<v>` is a full install with `@nats-io/*` pinned to
+  `<v>`; the runner copies `bench.js` and `workloads/` into it, so plain module
+  resolution picks that version, worker threads included.
+- Deno: `deno run --import-map .versions/<v>/import_map.json bench.js`.
+- Browser: `browser/entry.js` is bundled with `deno bundle` against the
+  version's import map and run in headless Chrome over WebSocket.
+  `bin/browser.js` serves the page and collects the result.
+
+Every workload runs through `workloads/job.js`, in the CLI workers and in the
+browser, so all runtimes run the same code with the same parameters.
+
 ## Project Structure
 
 ```
-jsbench/
+nats-bench/
 ├── bench.js                # Main CLI entry point
+├── bin/
+│   ├── versions.js        # Installs released client versions in .versions/
+│   ├── history.js         # Runs the history matrix
+│   ├── browser.js         # Runs a job in headless chrome
+│   └── report.js          # Tables and charts for a history run
+├── browser/entry.js        # Browser runner (bundled per client version)
+├── history/                # History runs, one json per combination
 ├── workloads/              # Benchmark workloads
+│   ├── job.js             # One job on a connection (cli workers and browser)
 │   ├── worker.js          # Worker thread implementation
 │   ├── pub.js             # Core NATS publish
 │   ├── sub.js             # Core NATS subscribe

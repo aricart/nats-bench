@@ -5,22 +5,58 @@
     "jsr:@aricart/nd-progress@^1.0.1": "1.0.1",
     "jsr:@aricart/runtime@^0.0.2": "0.0.2",
     "jsr:@deno-library/progress@^1.5.1": "1.5.1",
+    "jsr:@nats-io/jetstream@3.0.0": "3.0.0",
+    "jsr:@nats-io/jetstream@3.0.2": "3.0.2",
+    "jsr:@nats-io/jetstream@3.1.0": "3.1.0",
+    "jsr:@nats-io/jetstream@3.2.0": "3.2.0",
+    "jsr:@nats-io/jetstream@3.3.0": "3.3.0",
+    "jsr:@nats-io/jetstream@3.3.1": "3.3.1",
+    "jsr:@nats-io/jetstream@3.4.0": "3.4.0",
+    "jsr:@nats-io/jetstream@3.5.0": "3.5.0",
+    "jsr:@nats-io/kv@3.0.0": "3.0.0",
+    "jsr:@nats-io/kv@3.0.2": "3.0.2",
+    "jsr:@nats-io/kv@3.1.0": "3.1.0",
+    "jsr:@nats-io/kv@3.2.0": "3.2.0",
+    "jsr:@nats-io/kv@3.3.0": "3.3.0",
+    "jsr:@nats-io/kv@3.3.1": "3.3.1",
+    "jsr:@nats-io/kv@3.4.0": "3.4.0",
+    "jsr:@nats-io/kv@3.5.0": "3.5.0",
+    "jsr:@nats-io/nats-core@3.0.0": "3.0.0",
+    "jsr:@nats-io/nats-core@3.0.2": "3.0.2",
+    "jsr:@nats-io/nats-core@3.1.0": "3.1.0",
+    "jsr:@nats-io/nats-core@3.2.0": "3.2.0",
+    "jsr:@nats-io/nats-core@3.3.0": "3.3.0",
+    "jsr:@nats-io/nats-core@3.3.1": "3.3.1",
     "jsr:@nats-io/nats-core@3.4.0": "3.4.0",
-    "jsr:@nats-io/nats-core@3.4.1-0": "3.4.1-0",
+    "jsr:@nats-io/nats-core@3.5.0": "3.5.0",
     "jsr:@nats-io/nkeys@2.0.3": "2.0.3",
+    "jsr:@nats-io/nkeys@2.1.0": "2.1.0",
+    "jsr:@nats-io/nuid@2.0.3": "2.0.3",
     "jsr:@nats-io/nuid@3.0.0": "3.0.0",
-    "jsr:@nats-io/transport-deno@3.4.1-0": "3.4.1-0",
+    "jsr:@nats-io/nuid@3.1.0": "3.1.0",
+    "jsr:@nats-io/transport-deno@3.0.0": "3.0.0",
+    "jsr:@nats-io/transport-deno@3.0.2": "3.0.2",
+    "jsr:@nats-io/transport-deno@3.1.0": "3.1.0",
+    "jsr:@nats-io/transport-deno@3.2.0": "3.2.0",
+    "jsr:@nats-io/transport-deno@3.3.0": "3.3.0",
+    "jsr:@nats-io/transport-deno@3.3.1": "3.3.1",
+    "jsr:@nats-io/transport-deno@3.4.0": "3.4.0",
+    "jsr:@nats-io/transport-deno@3.5.0": "3.5.0",
     "jsr:@std/bytes@^1.0.5": "1.0.6",
+    "jsr:@std/bytes@^1.0.6": "1.0.6",
     "jsr:@std/fmt@1.0.3": "1.0.3",
     "jsr:@std/fmt@^1.0.8": "1.0.10",
     "jsr:@std/io@0.225.0": "0.225.0",
     "jsr:@std/io@0.225.2": "0.225.2",
+    "jsr:@std/io@0.225.3": "0.225.3",
     "npm:@jsr/aricart__cobra@~0.1.2": "0.1.2",
     "npm:@jsr/aricart__nd-progress@^1.0.1": "1.0.1",
-    "npm:@nats-io/jetstream@3.4.1-0": "3.4.1-0",
-    "npm:@nats-io/kv@3.4.1-0": "3.4.1-0",
-    "npm:@nats-io/nats-core@3.4.1-0": "3.4.1-0",
-    "npm:@nats-io/transport-node@3.4.1-0": "3.4.1-0",
+    "npm:@nats-io/jetstream@3.5.0": "3.5.0",
+    "npm:@nats-io/kv@3.5.0": "3.5.0",
+    "npm:@nats-io/nats-core@3.5.0": "3.5.0",
+    "npm:@nats-io/transport-node@3.0.0": "3.0.0",
+    "npm:@nats-io/transport-node@3.4.0": "3.4.0",
+    "npm:@nats-io/transport-node@3.5.0": "3.5.0",
     "npm:cli-progress@^3.12.0": "3.12.0",
     "npm:minimist@^1.2.8": "1.2.8",
     "npm:tweetnacl@1.0.3": "1.0.3"
@@ -51,18 +87,164 @@
         "jsr:@std/io@0.225.0"
       ]
     },
+    "@nats-io/jetstream@3.0.0": {
+      "integrity": "511256a1c8636cebe87a1645afa509d6bb54f72e46c46acc558e1bfe459b32eb",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.0.0"
+      ]
+    },
+    "@nats-io/jetstream@3.0.2": {
+      "integrity": "3d9b56c4eda252fe1575c7f68b0fc8071f2a3cedfd85ddadf9db3f7b40fbc857",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.0.2"
+      ]
+    },
+    "@nats-io/jetstream@3.1.0": {
+      "integrity": "70f8710384dee82e99f5d168470a320b25de7ae7cad164d2088a906ff140b5b8",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.1.0"
+      ]
+    },
+    "@nats-io/jetstream@3.2.0": {
+      "integrity": "f0cb819b3926a2d279d7db983e22924810c9d13e2c3ac7b5ec6eb9c6dcb03d68",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.2.0"
+      ]
+    },
+    "@nats-io/jetstream@3.3.0": {
+      "integrity": "131ca1ee63dc41fb4a79b8e27d0b2367dc4b3974aac8047b83757f38db85f3b4",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.3.0"
+      ]
+    },
+    "@nats-io/jetstream@3.3.1": {
+      "integrity": "0881df18ff746d42598af428d5a80abc695e998a679fcfc5303f18dd67958d4c",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.3.1"
+      ]
+    },
+    "@nats-io/jetstream@3.4.0": {
+      "integrity": "8a8f7dab0d984bf237dfd4fe853145b6b35a37814741bf57c2ddf826a678561b",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.4.0"
+      ]
+    },
+    "@nats-io/jetstream@3.5.0": {
+      "integrity": "6a56123b11b211d10b2977da670f06323bbb27a775d572a448add92406c3e0b0",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.5.0"
+      ]
+    },
+    "@nats-io/kv@3.0.0": {
+      "integrity": "bc59116408ed5c919a4c8352bc826ba4b9279df2c2228aa6fbae9d227b649e90",
+      "dependencies": [
+        "jsr:@nats-io/jetstream@3.0.0",
+        "jsr:@nats-io/nats-core@3.0.0"
+      ]
+    },
+    "@nats-io/kv@3.0.2": {
+      "integrity": "cab4673cb8d37392bd67251be9083090bb10808a915ef2d4c209893c3cfeff66",
+      "dependencies": [
+        "jsr:@nats-io/jetstream@3.0.2",
+        "jsr:@nats-io/nats-core@3.0.2"
+      ]
+    },
+    "@nats-io/kv@3.1.0": {
+      "integrity": "2c41c78cc58b8ca537f67366b04a6af8ca52b10ad16f068e4263a78c02183251",
+      "dependencies": [
+        "jsr:@nats-io/jetstream@3.1.0",
+        "jsr:@nats-io/nats-core@3.1.0"
+      ]
+    },
+    "@nats-io/kv@3.2.0": {
+      "integrity": "938283c98cdcf0069bd5c18d35ae05057c302c5cc4819962f10909de31ff5f24",
+      "dependencies": [
+        "jsr:@nats-io/jetstream@3.2.0",
+        "jsr:@nats-io/nats-core@3.2.0"
+      ]
+    },
+    "@nats-io/kv@3.3.0": {
+      "integrity": "5aadf754bc74dc6c6423b7341c36a7612461a211d470e22cd59b78e4d6eecd6b",
+      "dependencies": [
+        "jsr:@nats-io/jetstream@3.3.0",
+        "jsr:@nats-io/nats-core@3.3.0"
+      ]
+    },
+    "@nats-io/kv@3.3.1": {
+      "integrity": "6900c5e1a5cfc30fcc7d33368ff2403bd3015d6ccab5fddf725c3101953c5a75",
+      "dependencies": [
+        "jsr:@nats-io/jetstream@3.3.1",
+        "jsr:@nats-io/nats-core@3.3.1"
+      ]
+    },
+    "@nats-io/kv@3.4.0": {
+      "integrity": "e17c34c6586745dbe7bd19b8b6eeb974701e78668294e3d834d0edc03d295c4f",
+      "dependencies": [
+        "jsr:@nats-io/jetstream@3.4.0",
+        "jsr:@nats-io/nats-core@3.4.0"
+      ]
+    },
+    "@nats-io/kv@3.5.0": {
+      "integrity": "4c55975ba98b4bc263b2c299554d7b4e511f4d9f1688e422ae58235fe45170bc",
+      "dependencies": [
+        "jsr:@nats-io/jetstream@3.5.0",
+        "jsr:@nats-io/nats-core@3.5.0"
+      ]
+    },
+    "@nats-io/nats-core@3.0.0": {
+      "integrity": "12f422be774a06705991140a74d2e0a8554042886496d97b9d3ebb7584e5ef26",
+      "dependencies": [
+        "jsr:@nats-io/nkeys@2.0.3",
+        "jsr:@nats-io/nuid@2.0.3"
+      ]
+    },
+    "@nats-io/nats-core@3.0.2": {
+      "integrity": "e38944d564ea50d5c50f2d8d47f16cead1872d16b12e76ece64933d87a65176b",
+      "dependencies": [
+        "jsr:@nats-io/nkeys@2.0.3",
+        "jsr:@nats-io/nuid@2.0.3"
+      ]
+    },
+    "@nats-io/nats-core@3.1.0": {
+      "integrity": "23d343db34c1b5778c33ee41e18169c71a0fbb6eeb2f96584165299c4967a958",
+      "dependencies": [
+        "jsr:@nats-io/nkeys@2.0.3",
+        "jsr:@nats-io/nuid@2.0.3"
+      ]
+    },
+    "@nats-io/nats-core@3.2.0": {
+      "integrity": "63d4958c9327de4d1ad436a17969290df7c96f9f887c3190e05839574aaa9e9b",
+      "dependencies": [
+        "jsr:@nats-io/nkeys@2.0.3",
+        "jsr:@nats-io/nuid@2.0.3"
+      ]
+    },
+    "@nats-io/nats-core@3.3.0": {
+      "integrity": "f7401e99c862867857e88f610594026fe9d0682abffdf0c261b16e9a2b1f43c1",
+      "dependencies": [
+        "jsr:@nats-io/nkeys@2.0.3",
+        "jsr:@nats-io/nuid@2.0.3"
+      ]
+    },
+    "@nats-io/nats-core@3.3.1": {
+      "integrity": "61c9624a9f775399a817f3fea7fa84445942ba47108d50b1f1d0ab1eba55a4ea",
+      "dependencies": [
+        "jsr:@nats-io/nkeys@2.0.3",
+        "jsr:@nats-io/nuid@2.0.3"
+      ]
+    },
     "@nats-io/nats-core@3.4.0": {
       "integrity": "55aadb128a34a591a8fb251ab2f525c55e3473958e04bfd057e71bbe6f278c52",
       "dependencies": [
-        "jsr:@nats-io/nkeys",
-        "jsr:@nats-io/nuid"
+        "jsr:@nats-io/nkeys@2.0.3",
+        "jsr:@nats-io/nuid@3.0.0"
       ]
     },
-    "@nats-io/nats-core@3.4.1-0": {
-      "integrity": "4a730cb53f1dfbeae03bfcacac1346617981e179375323f8ba06f4ae4129ac7c",
+    "@nats-io/nats-core@3.5.0": {
+      "integrity": "195e29e464a7001433ba22be60caed4681f44f57345ba01c11b6485dc96c8029",
       "dependencies": [
-        "jsr:@nats-io/nkeys",
-        "jsr:@nats-io/nuid"
+        "jsr:@nats-io/nkeys@2.1.0",
+        "jsr:@nats-io/nuid@3.1.0"
       ]
     },
     "@nats-io/nkeys@2.0.3": {
@@ -71,14 +253,75 @@
         "npm:tweetnacl"
       ]
     },
+    "@nats-io/nkeys@2.1.0": {
+      "integrity": "e0f1988e342695f5bfcaf400652b7f103e67189fe252b1d7a741f45790a4eeb4",
+      "dependencies": [
+        "npm:tweetnacl"
+      ]
+    },
+    "@nats-io/nuid@2.0.3": {
+      "integrity": "c1069446e43dfa4f5e599c398a1bfc1be0c8dab1c839b6d2b9c3617cc1998306"
+    },
     "@nats-io/nuid@3.0.0": {
       "integrity": "af637fd340e763d48845402f71ffd313808d88beb9abefbaf02037003056a07d"
     },
-    "@nats-io/transport-deno@3.4.1-0": {
-      "integrity": "f3765226c40ce87e71950e17f27cddf44629ab9fd70250e9455326044599d538",
+    "@nats-io/nuid@3.1.0": {
+      "integrity": "ebd5fac37850648d48980b40baf1f67d9811aa855d6dce2fd5b54f91de4911e2"
+    },
+    "@nats-io/transport-deno@3.0.0": {
+      "integrity": "b3faec835b9de67f636758146db42a1928d94e5caf476be6df0f2ea9704337d0",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.0.0",
+        "jsr:@std/io@0.225.2"
+      ]
+    },
+    "@nats-io/transport-deno@3.0.2": {
+      "integrity": "04064eeb974d713170c0885ede13fba11dbee01bfa21ad134a9f76af63909454",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.0.2",
+        "jsr:@std/io@0.225.2"
+      ]
+    },
+    "@nats-io/transport-deno@3.1.0": {
+      "integrity": "46bef0da74400de78192b862983a1d393b7060a4d34c257a1936980c56e2bd7d",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.1.0",
+        "jsr:@std/io@0.225.2"
+      ]
+    },
+    "@nats-io/transport-deno@3.2.0": {
+      "integrity": "c6f8446bb38357063f5056d1fa8c76191828fcc356cccd513792281ed1ad0d26",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.2.0",
+        "jsr:@std/io@0.225.2"
+      ]
+    },
+    "@nats-io/transport-deno@3.3.0": {
+      "integrity": "1b384530501d352982f8694fc122b145c6626d3583dc249fc6fc33241e502470",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.3.0",
+        "jsr:@std/io@0.225.2"
+      ]
+    },
+    "@nats-io/transport-deno@3.3.1": {
+      "integrity": "414e7b31e48f0baf8d6bc9803b9b4effd620c7e44a672f33ed0bae2028f0d885",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.3.1",
+        "jsr:@std/io@0.225.2"
+      ]
+    },
+    "@nats-io/transport-deno@3.4.0": {
+      "integrity": "13235bb178853647c01584e5b1f1e59946ffa3157cfc1c7336d70bf3db600575",
       "dependencies": [
         "jsr:@nats-io/nats-core@3.4.0",
         "jsr:@std/io@0.225.2"
+      ]
+    },
+    "@nats-io/transport-deno@3.5.0": {
+      "integrity": "40942329834172a32af4634a7ef94623951f048e12b7f23b33d554bd4f1aa64a",
+      "dependencies": [
+        "jsr:@nats-io/nats-core@3.5.0",
+        "jsr:@std/io@0.225.3"
       ]
     },
     "@std/bytes@1.0.6": {
@@ -96,7 +339,13 @@
     "@std/io@0.225.2": {
       "integrity": "3c740cd4ee4c082e6cfc86458f47e2ab7cb353dc6234d5e9b1f91a2de5f4d6c7",
       "dependencies": [
-        "jsr:@std/bytes"
+        "jsr:@std/bytes@^1.0.5"
+      ]
+    },
+    "@std/io@0.225.3": {
+      "integrity": "27b07b591384d12d7b568f39e61dff966b8230559122df1e9fd11cc068f7ddd1",
+      "dependencies": [
+        "jsr:@std/bytes@^1.0.6"
       ]
     }
   },
@@ -149,30 +398,38 @@
       ],
       "tarball": "https://npm.jsr.io/~/11/@jsr/std__io/0.225.0.tgz"
     },
-    "@nats-io/jetstream@3.4.0": {
-      "integrity": "sha512-GzHQodNJ942+R5LRb8PuZ5ugVWVWMRiufxUYLLVWkXKfwDXYN+Owo0d7L/b9O7BPyrbYD7jQWAC6+ZVuXa9Gyw==",
+    "@nats-io/jetstream@3.5.0": {
+      "integrity": "sha512-+auzo9mYvcsqq+H1ZBdSslkiPF96W4zbqpAT9Ni6ComcaA+j9cLpGGYYWpDqJCRrArZ8AxVAYvd7IxukZ/9z7w==",
       "dependencies": [
-        "@nats-io/nats-core"
+        "@nats-io/nats-core@3.5.0"
       ]
     },
-    "@nats-io/jetstream@3.4.1-0": {
-      "integrity": "sha512-7kToCbjbo2ZjSKZPJnORVF7Ud+DRQS8zSQkKLW39fzRKAChtLAp/1Oupz7bUkAiucrOzfXms6yI6C9+GQKKiAw==",
+    "@nats-io/kv@3.5.0": {
+      "integrity": "sha512-uxTiE79FxSYwvRZtW4B+rKc48ZR6VMyMkDCzhHQovQGL/6o6JJ10kQTxuenFwPmeTh6jC/kt75SjgPxuoX3Ftg==",
       "dependencies": [
-        "@nats-io/nats-core"
+        "@nats-io/jetstream",
+        "@nats-io/nats-core@3.5.0"
       ]
     },
-    "@nats-io/kv@3.4.1-0": {
-      "integrity": "sha512-oRsRzIwS8vtIr++FtVSj32BsmYSIKBd0SlYHdt9ogaUkYYfWircCDYA6JPG1demCnHJ5oc8vDYzNEtp10jlysA==",
+    "@nats-io/nats-core@3.0.0": {
+      "integrity": "sha512-Ma2VrFkSew35cIRxMvnbQ2VOE2crP7BCIIsGoCqVwvn6Jwmk2ypcHjj9pWn+bPXqmFlamLUrYGH6ncMDb4eXsQ==",
       "dependencies": [
-        "@nats-io/jetstream@3.4.0",
-        "@nats-io/nats-core"
+        "@nats-io/nkeys@2.0.3",
+        "@nats-io/nuid@2.0.3"
       ]
     },
-    "@nats-io/nats-core@3.4.1-0": {
-      "integrity": "sha512-KPofOEL/pBH0ASxwV8GN/uUU/ycRrNVCrJlF4zUrGCV9ImIARCY2HPSLiWdmOi1lbLuSLZO50CLnzCUbx+NeOA==",
+    "@nats-io/nats-core@3.4.0": {
+      "integrity": "sha512-QMDM86EUNm+wudlKC67HLar/KHHQUvJGLfb4jbahje3pUk3K9afeck9fwsxBZF0eUFox6T/TA6m/t+lQqf+QsQ==",
       "dependencies": [
-        "@nats-io/nkeys",
-        "@nats-io/nuid"
+        "@nats-io/nkeys@2.0.3",
+        "@nats-io/nuid@3.0.0"
+      ]
+    },
+    "@nats-io/nats-core@3.5.0": {
+      "integrity": "sha512-iHsKhlzINdpL27pxvbHhBLRs4mnAKDfYrXMReBDNqvhKb/yVxz+Vz2rXujBAUiMsfOXFzixUK4Uu/qNnDRjZvA==",
+      "dependencies": [
+        "@nats-io/nkeys@2.1.0",
+        "@nats-io/nuid@3.1.0"
       ]
     },
     "@nats-io/nkeys@2.0.3": {
@@ -181,15 +438,43 @@
         "tweetnacl"
       ]
     },
+    "@nats-io/nkeys@2.1.0": {
+      "integrity": "sha512-vLMgwfPouG2Utp3hHUfdmMVEGEQ202tLES/pOAOfTJR5hwWGymm2mKuo3UMYv9kNw7awpcTBfEAljFqZcFm1lA==",
+      "dependencies": [
+        "tweetnacl"
+      ]
+    },
+    "@nats-io/nuid@2.0.3": {
+      "integrity": "sha512-TpA3HEBna/qMVudy+3HZr5M3mo/L1JPofpVT4t0HkFGkz2Cn9wrlrQC8tvR8Md5Oa9//GtGG26eN0qEWF5Vqew=="
+    },
     "@nats-io/nuid@3.0.0": {
       "integrity": "sha512-QbXZDrxmYlrn5AD06gYcUTmEHwxn96HBQMIk7XTjDlEcx6FPzVBBPjp4AMRh1lEv6B4iJ6Xb/Uz61JugPXFRQg=="
     },
-    "@nats-io/transport-node@3.4.1-0": {
-      "integrity": "sha512-FyMLvZCevEKlZhUERnRrkcYu1nEhVRxQPG74gunQ9GcHw17ntqhSzNyfvc2OiXx8Rd1Kk4rQfFA1elyeGM+hyA==",
+    "@nats-io/nuid@3.1.0": {
+      "integrity": "sha512-NC+JksVZl0zwpwsO6aIvsivqcqzgI2db0gCris/bSdZx56CdyniphijTfcjieUpR4HwZEiiid67NEviQ16sveA=="
+    },
+    "@nats-io/transport-node@3.0.0": {
+      "integrity": "sha512-s4qeJDz3KYxE1R19uxKtFgAiBg2l3n12o9H0mxyOwWfqJ5dLbZf+m54Py0s9VqZN7M76t5E+eeUSx58/vS2oxQ==",
       "dependencies": [
-        "@nats-io/nats-core",
-        "@nats-io/nkeys",
-        "@nats-io/nuid"
+        "@nats-io/nats-core@3.0.0",
+        "@nats-io/nkeys@2.0.3",
+        "@nats-io/nuid@2.0.3"
+      ]
+    },
+    "@nats-io/transport-node@3.4.0": {
+      "integrity": "sha512-hH7u7ejIBTFEJIZ8rIcMrHJI6wl+HhpO5sVFs1+ppmXa8RuB2+Lh1+UwTzZ5xTNNm1TKcRkYy+2qCV56qp8RxA==",
+      "dependencies": [
+        "@nats-io/nats-core@3.4.0",
+        "@nats-io/nkeys@2.0.3",
+        "@nats-io/nuid@3.0.0"
+      ]
+    },
+    "@nats-io/transport-node@3.5.0": {
+      "integrity": "sha512-5Ebt62tnQsrrb3p+aHJt0+zRHAkxbUhhD+8HnHNBTYRgXJ2X2LgvOD19EiiAISdW7yR4IQSmsdvpfX+I5oG5ew==",
+      "dependencies": [
+        "@nats-io/nats-core@3.5.0",
+        "@nats-io/nkeys@2.1.0",
+        "@nats-io/nuid@3.1.0"
       ]
     },
     "ansi-regex@5.0.1": {
@@ -232,24 +517,23 @@
     "dependencies": [
       "jsr:@aricart/cobra@~0.1.2",
       "jsr:@aricart/nd-progress@^1.0.1",
-      "jsr:@nats-io/nats-core@3.4.1-0",
-      "jsr:@nats-io/transport-deno@3.4.1-0",
-      "npm:@nats-io/transport-node@3.4.1-0"
+      "jsr:@nats-io/jetstream@3.5.0",
+      "jsr:@nats-io/kv@3.5.0",
+      "jsr:@nats-io/nats-core@3.5.0",
+      "jsr:@nats-io/transport-deno@3.5.0",
+      "npm:@nats-io/transport-node@3.5.0"
     ],
     "packageJson": {
       "dependencies": [
         "npm:@jsr/aricart__cobra@~0.1.2",
         "npm:@jsr/aricart__nd-progress@^1.0.1",
-        "npm:@nats-io/jetstream@3.4.1-0",
-        "npm:@nats-io/kv@3.4.1-0",
-        "npm:@nats-io/nats-core@3.4.1-0",
-        "npm:@nats-io/transport-node@3.4.1-0",
+        "npm:@nats-io/jetstream@3.5.0",
+        "npm:@nats-io/kv@3.5.0",
+        "npm:@nats-io/nats-core@3.5.0",
+        "npm:@nats-io/transport-node@3.5.0",
         "npm:cli-progress@^3.12.0",
         "npm:minimist@^1.2.8"
-      ],
-      "overrides": {
-        "@nats-io/nats-core": "3.4.1-0"
-      }
+      ]
     }
   }
 }
