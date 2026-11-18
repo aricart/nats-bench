@@ -1,6 +1,6 @@
 {
   "name": "@aricart/nats-bench",
-  "version": "0.1.0-0",
+  "version": "0.1.0-1",
   "license": "Apache-2.0",
   "exports": {
     "./cli": "./bench.js"

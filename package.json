@@ -1,6 +1,6 @@
 {
   "name": "@aricart/nats-bench",
-  "version": "0.1.0-0",
+  "version": "0.1.0-1",
   "description": "NATS benchmarks for the JavaScript clients: core pub/sub, JetStream and KV, on Node.js, Deno and Bun",
   "type": "module",
   "bin": {
